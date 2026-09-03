@@ -21,7 +21,9 @@ export interface WaterState {
   muniCode: string | null;
   /** UI の津波高（T.P. m）。選択中の市区町村とプリセット値が無い市区町村に適用 */
   heightM: number;
-  preset: TsunamiPreset | 'manual';
+  preset: TsunamiPreset | 'case' | 'manual';
+  /** preset が 'case' のときの内閣府 津波ケース "1".."11"（cases_2025 のキー） */
+  caseId?: string | null;
   show: boolean;
 }
 
@@ -130,7 +132,14 @@ export function createWaterLayer(viewer: Cesium.Viewer, opts: WaterOptions): Wat
 
   function tpHeightFor(code: string): number {
     if (code === state.muniCode || state.preset === 'manual') return state.heightM;
-    const h = tsunamiHeight(findTsunamiRow(opts.tsunami, code), state.preset);
+    const row = findTsunamiRow(opts.tsunami, code);
+    if (state.preset === 'case') {
+      // ケース別: その市区町村のそのケースの公表値。無ければ 2025 最大 → UI 値の順で代替
+      const v = state.caseId ? row?.cases_2025?.[state.caseId] : null;
+      if (typeof v === 'number' && Number.isFinite(v)) return v;
+      return tsunamiHeight(row, 'max_2025') ?? state.heightM;
+    }
+    const h = tsunamiHeight(row, state.preset);
     return h ?? state.heightM;
   }
 

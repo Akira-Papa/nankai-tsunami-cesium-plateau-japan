@@ -109,6 +109,12 @@
     <div id="readoutHint" class="readout-hint" aria-hidden="true">地図をタップ → その地点の浸水深を表示</div>
     <div id="readout" class="readout" role="status" aria-live="polite" title="タップで閉じる" hidden></div>
 
+    <!-- 震源域オーバーレイの地図凡例（ケース選択中のみ表示。main.ts が更新） -->
+    <div id="slipLegend" class="slip-legend" role="note" hidden>
+      <span class="slip-swatch" aria-hidden="true"></span>
+      <span id="slipLegendText">震源域（大すべり域・超大すべり域）の概略</span>
+    </div>
+
     <button id="panelToggle" class="panel-toggle" type="button" aria-expanded="true" aria-controls="panel">▼ パネルを閉じる</button>
 
     <aside id="panel" class="panel" aria-labelledby="appTitle">
@@ -154,6 +160,23 @@
         <p id="tsNote" class="note ts-note" hidden></p>
       </section>
 
+      <!-- 2b. 津波の発生パターン（内閣府 津波ケース①〜⑪＝大すべり域の位置） -->
+      <section class="sec" aria-labelledby="caseTitle">
+        <div id="caseTitle" class="sec-title">津波の発生パターンを選ぶ（震源域＝大すべり域の位置）</div>
+        <div class="field">
+          <label for="caseSelect">津波ケース</label>
+          <select id="caseSelect" class="select" aria-label="内閣府 津波ケース（大すべり域の位置）" aria-describedby="caseNote"></select>
+        </div>
+        <p id="caseDesc" class="note case-desc" aria-live="polite"></p>
+        <div id="caseMapLegend" class="case-map-legend" hidden>
+          <span class="slip-swatch" aria-hidden="true"></span>
+          <span class="case-map-legend-text"><strong>赤い範囲＝震源域（大すべり域・超大すべり域）の概略</strong>。震源の一点ではなく範囲です。公式の区域名（例「四国沖」）に対応する目安で、公式図の正確な範囲・断層線・破壊開始点ではありません。</span>
+          <button id="caseFit" type="button" class="btn btn-small">震源域と市区町村を一画面に</button>
+        </div>
+        <p id="caseNote" class="note">候補は内閣府 南海トラフ巨大地震モデル検討会が設定した公式ケース①〜⑪（大すべり域・超大すべり域の位置）だけです。任意の震源点を推測して表示するものではありません。ケースを選ぶと、選択中の市区町村のそのケースの最大津波高（公表値）が津波高に反映されます。
+          <a id="caseSource" href="https://www.bousai.go.jp/jishin/nankai/model/" target="_blank" rel="noopener">出典（内閣府）</a></p>
+      </section>
+
       <!-- 3. 津波高の指定（プリセット＋スライダー） -->
       <section class="sec" aria-labelledby="heightTitle">
         <div class="row-between">
@@ -163,7 +186,19 @@
         <div id="presets" class="presets" role="group" aria-label="津波高プリセット"></div>
         <input id="heightSlider" type="range" min="0" max="35" step="0.1" value="5.0" aria-describedby="heightScale" aria-label="津波の高さ（メートル）" />
         <div id="heightScale" class="scale" aria-hidden="true"><span>0</span><span>5</span><span>10</span><span>15</span><span>20</span><span>25</span><span>30</span><span>35 m</span></div>
-        <p class="note">※ 内閣府の津波高は海岸線での最大値です。内陸へ一律に適用すると過大・過小になります。スライダーを動かすと「手動」になります。</p>
+        <p class="note">※ 内閣府の津波高は海岸線での最大値です。内陸へ一律に適用すると過大・過小になります。「ケース別」は上で選んだ津波ケースの値です。スライダーを動かすと「手動」になります。震度から津波高は直接換算できません。</p>
+      </section>
+
+      <!-- 3b. 参考: 震度（揺れの強さ。浸水表示には影響しない） -->
+      <section class="sec" aria-labelledby="intensityTitle">
+        <div id="intensityTitle" class="sec-title">参考: 揺れの強さ（震度）を選ぶ</div>
+        <div class="field">
+          <label for="intensitySelect">震度階級</label>
+          <select id="intensitySelect" class="select" aria-label="震度階級（参考表示）" aria-describedby="intensityNote"></select>
+        </div>
+        <div id="intensityDesc" class="intensity-desc" aria-live="polite" hidden></div>
+        <p id="intensityNote" class="note"><strong>震度は「揺れの強さ」の指標で、津波高・浸水深とは別のものです。</strong>ここで選んだ震度は気象庁の解説（体感・屋内外の状況）を表示するだけで、地図の浸水表示は変わりません。本アプリは震度から浸水深を計算していません。
+          <a id="intensitySource" href="https://www.jma.go.jp/jma/kishou/know/shindo/kaisetsu.html" target="_blank" rel="noopener">出典（気象庁 震度階級関連解説表）</a></p>
       </section>
 
       <!-- 4. 表示設定 -->

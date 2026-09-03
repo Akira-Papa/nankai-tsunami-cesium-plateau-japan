@@ -1,4 +1,5 @@
 import { findTsunamiRow } from './data';
+import { TSUNAMI_CASES, findCase, JMA_INTENSITY, findIntensity } from './scenarios';
 /**
  * UI モジュール（全国版 南海トラフ津波ビジュアライザ／CesiumJS 版）
  *
@@ -55,13 +56,18 @@ export interface TsunamiFile {
 // ---------------------------------------------------------------------------
 // 公開インターフェース
 // ---------------------------------------------------------------------------
-export type Preset = 'max_2025' | 'mean_2025' | 'max_2012' | 'manual';
+/** `case` = 上で選んだ内閣府 津波ケース（①〜⑪）の市町村別最大津波高 */
+export type Preset = 'max_2025' | 'mean_2025' | 'max_2012' | 'case' | 'manual';
 export type Imagery = 'pale' | 'photo';
 
 export interface UiState {
   muniCode: string | null;
   heightM: number;
   preset: Preset;
+  /** 内閣府 津波ケース "1".."11"。null = 指定なし（最大値ベース） */
+  caseId: string | null;
+  /** 参考表示の震度階級キー（'5-' 等）。地図表示には影響しない */
+  intensity: string | null;
   showOfficial: boolean;
   showBuildings: boolean;
   lod2: boolean;
@@ -73,6 +79,8 @@ export interface UiCallbacks {
   onChange(s: UiState): void;
   onFlyTo(code: string): void;
   onResetView(): void;
+  /** 「震源域と市区町村を一画面に」（任意） */
+  onFitCase?(): void;
 }
 
 export interface UiHandle {
@@ -92,14 +100,17 @@ const PRESET_LABEL: Record<Preset, string> = {
   max_2025: '2025 最大',
   mean_2025: '2025 平均',
   max_2012: '2012 最大',
+  case: 'ケース別',
   manual: '手動',
 };
-const PRESET_ORDER: Preset[] = ['max_2025', 'mean_2025', 'max_2012', 'manual'];
+const PRESET_ORDER: Preset[] = ['max_2025', 'mean_2025', 'max_2012', 'case', 'manual'];
 
 const DEFAULT_STATE: UiState = {
   muniCode: null,
   heightM: 5.0,
   preset: 'max_2025',
+  caseId: null,
+  intensity: null,
   showOfficial: false,
   showBuildings: true,
   lod2: false,
@@ -141,8 +152,12 @@ function isTarget(m: Municipality): boolean {
   return !!(m.nankai_target || m.coastal);
 }
 
-function presetValue(row: TsunamiRow | undefined, p: Preset): number | null {
+function presetValue(row: TsunamiRow | undefined, p: Preset, caseId: string | null = null): number | null {
   if (!row || p === 'manual') return null;
+  if (p === 'case') {
+    const v = caseId ? row.cases_2025?.[caseId] : null;
+    return typeof v === 'number' && Number.isFinite(v) ? v : null;
+  }
   const v = row[p];
   return typeof v === 'number' && Number.isFinite(v) ? v : null;
 }
@@ -212,6 +227,13 @@ export function initUi(
   const tsNote = $<HTMLElement>('tsNote');
   const tsUnit = $<HTMLElement>('tsUnit');
 
+  const caseSelect = $<HTMLSelectElement>('caseSelect');
+  const caseDesc = $<HTMLElement>('caseDesc');
+  const caseMapLegend = $<HTMLElement>('caseMapLegend');
+  const caseFit = $<HTMLButtonElement>('caseFit');
+  const intensitySelect = $<HTMLSelectElement>('intensitySelect');
+  const intensityDesc = $<HTMLElement>('intensityDesc');
+
   const presetsEl = $<HTMLDivElement>('presets');
   const slider = $<HTMLInputElement>('heightSlider');
   const heightReadout = $<HTMLOutputElement>('heightReadout');
@@ -247,6 +269,10 @@ export function initUi(
       const q = new URLSearchParams(window.location.search);
       const m = q.get('m');
       if (m && /^\d{5}$/.test(m)) out.muniCode = m;
+      const c = q.get('c');
+      if (c && findCase(c)) { out.caseId = c; out.preset = 'case'; }
+      const si = q.get('si');
+      if (si && findIntensity(si)) out.intensity = si;
       const h = q.get('h');
       if (h !== null && h !== '') {
         const v = parseFloat(h);
@@ -260,6 +286,8 @@ export function initUi(
     try {
       const url = new URL(window.location.href);
       if (state.muniCode) url.searchParams.set('m', state.muniCode); else url.searchParams.delete('m');
+      if (state.caseId) url.searchParams.set('c', state.caseId); else url.searchParams.delete('c');
+      if (state.intensity) url.searchParams.set('si', state.intensity); else url.searchParams.delete('si');
       url.searchParams.set('h', state.heightM.toFixed(1));
       const next = `${url.pathname}${url.search}${url.hash}`;
       const cur = `${window.location.pathname}${window.location.search}${window.location.hash}`;
@@ -270,6 +298,8 @@ export function initUi(
   function applyPartial(p: Partial<UiState>) {
     if ('muniCode' in p) state.muniCode = normalizeCode(p.muniCode);
     if (typeof p.heightM === 'number') state.heightM = clampHeight(p.heightM);
+    if ('caseId' in p) state.caseId = findCase(p.caseId)?.id ?? null;
+    if ('intensity' in p) state.intensity = findIntensity(p.intensity)?.key ?? null;
     if (p.preset && PRESET_ORDER.includes(p.preset)) state.preset = p.preset;
     if (typeof p.showOfficial === 'boolean') state.showOfficial = p.showOfficial;
     if (typeof p.showBuildings === 'boolean') state.showBuildings = p.showBuildings;
@@ -281,7 +311,8 @@ export function initUi(
   /** プリセットに対応する津波高を state.heightM へ反映。値が無ければ手動へ落とす */
   function applyPreset(p: Preset): void {
     const row = findRow(state.muniCode);
-    const v = presetValue(row, p);
+    const v = presetValue(row, p, state.caseId);
+    if (p === 'case' && v === null) { applyPreset('max_2025'); return; } // ケース値が無い市区町村は最大値へ
     if (p !== 'manual' && v === null) { state.preset = 'manual'; return; }
     state.preset = p;
     if (v !== null) state.heightM = clampHeight(v);
@@ -391,8 +422,9 @@ export function initUi(
       b.append(val, label);
       b.addEventListener('click', () => {
         if (p === 'manual') { state.preset = 'manual'; }
+        else if (p === 'case' && !state.caseId) { caseSelect.focus(); return; } // ケース未選択なら選択欄へ誘導
         else {
-          const v = presetValue(findRow(state.muniCode), p);
+          const v = presetValue(findRow(state.muniCode), p, state.caseId);
           if (v === null) return; // データなし（disabled のはず）
           state.preset = p;
           state.heightM = clampHeight(v);
@@ -413,8 +445,12 @@ export function initUi(
         val.textContent = `${state.heightM.toFixed(1)} m`;
         btn.disabled = false;
         btn.setAttribute('aria-label', `手動 ${state.heightM.toFixed(1)} m`);
+      } else if (p === 'case' && !state.caseId) {
+        val.textContent = 'ケース未選択';
+        btn.disabled = false;
+        btn.setAttribute('aria-label', 'ケース別（上で津波ケースを選択してください）');
       } else {
-        const v = presetValue(row, p);
+        const v = presetValue(row, p, state.caseId);
         val.textContent = v === null ? 'データなし' : `${v.toFixed(1)} m`;
         btn.disabled = v === null;
         btn.setAttribute('aria-label', `${PRESET_LABEL[p]} ${v === null ? 'データなし' : `${v.toFixed(1)} m`}`);
@@ -448,7 +484,102 @@ export function initUi(
     renderTsunamiTable();
     renderPresets();
     renderControls();
+    renderCase();
+    renderIntensity();
   }
+
+  // ---- 津波ケース（内閣府 ①〜⑪＝大すべり域の位置） ---------------------------------
+  function buildCaseOptions() {
+    caseSelect.replaceChildren();
+    const none = document.createElement('option');
+    none.value = '';
+    none.textContent = '指定なし（全ケースの最大値で表示）';
+    caseSelect.appendChild(none);
+    for (const c of TSUNAMI_CASES) {
+      const o = document.createElement('option');
+      o.value = c.id;
+      const tag = c.branchFault ? '・分岐断層あり' : c.slipCount === 2 ? '・2箇所' : '';
+      o.textContent = `${c.label} ${c.regions}${tag}`;
+      caseSelect.appendChild(o);
+    }
+    caseSelect.disabled = TSUNAMI_CASES.length === 0;
+  }
+
+  function renderCase() {
+    const c = findCase(state.caseId);
+    if (caseSelect.value !== (c ? c.id : '')) caseSelect.value = c ? c.id : '';
+    caseMapLegend.hidden = !c;
+    if (!c) {
+      caseDesc.textContent = '指定なしのときは、各市区町村の「①〜⑪の最大値」（2025 一覧表の最大値）を使います。';
+      return;
+    }
+    const parts = [`${c.label}: 大すべり域・超大すべり域を「${c.regions}」に設定`];
+    if (c.branchFault) parts.push('熊野灘の分岐断層が動く想定');
+    if (c.slipCount === 2) parts.push('大すべり域を2箇所に設定');
+    if (c.note) parts.push(c.note);
+    const m = state.muniCode ? muniByCode.get(state.muniCode) : undefined;
+    if (m) {
+      const row = findRow(state.muniCode);
+      const v = presetValue(row, 'case', state.caseId);
+      const max = presetValue(row, 'max_2025');
+      parts.push(v === null
+        ? `${m.name}: このケースの公表値はありません`
+        : `${m.name}: このケースの最大津波高 ${v.toFixed(1)} m` + (max !== null ? `（全ケース最大 ${max.toFixed(1)} m）` : ''));
+    } else {
+      parts.push('市区町村を選ぶと、そのケースの市町村別最大津波高（公表値）を表示・反映します');
+    }
+    caseDesc.textContent = parts.join('。') + '。';
+  }
+
+  caseSelect.addEventListener('change', () => {
+    const next = findCase(caseSelect.value)?.id ?? null;
+    state.caseId = next;
+    if (next) applyPreset('case');
+    else if (state.preset === 'case') applyPreset('max_2025');
+    render();
+    emit();
+  });
+  caseFit.addEventListener('click', () => cb.onFitCase?.());
+
+  // ---- 震度（参考表示。地図には影響しない） ------------------------------------------
+  function buildIntensityOptions() {
+    intensitySelect.replaceChildren();
+    const none = document.createElement('option');
+    none.value = '';
+    none.textContent = '選択なし';
+    intensitySelect.appendChild(none);
+    for (const lv of JMA_INTENSITY) {
+      const o = document.createElement('option');
+      o.value = lv.key;
+      o.textContent = lv.label;
+      intensitySelect.appendChild(o);
+    }
+    intensitySelect.disabled = JMA_INTENSITY.length === 0;
+  }
+
+  function renderIntensity() {
+    const lv = findIntensity(state.intensity);
+    if (intensitySelect.value !== (lv ? lv.key : '')) intensitySelect.value = lv ? lv.key : '';
+    intensityDesc.replaceChildren();
+    intensityDesc.hidden = !lv;
+    if (!lv) return;
+    const head = document.createElement('div');
+    head.className = 'intensity-head';
+    head.textContent = `${lv.label}（気象庁 震度階級関連解説表より）`;
+    const dl = document.createElement('dl');
+    for (const [k, v] of [['人の体感・行動', lv.people], ['屋内の状況', lv.indoor], ['屋外の状況', lv.outdoor]]) {
+      const dt = document.createElement('dt'); dt.textContent = k;
+      const dd = document.createElement('dd'); dd.textContent = v;
+      dl.append(dt, dd);
+    }
+    intensityDesc.append(head, dl);
+  }
+
+  intensitySelect.addEventListener('change', () => {
+    state.intensity = findIntensity(intensitySelect.value)?.key ?? null;
+    renderIntensity();
+    emit();
+  });
 
   // ---- イベント ------------------------------------------------------------------
   prefSelect.addEventListener('change', () => { buildMuniOptions(); });
@@ -500,12 +631,16 @@ export function initUi(
     panelToggle.textContent = open ? '▼ パネルを閉じる' : '▲ パネルを開く';
     panelToggle.classList.toggle('collapsed', !open);
     panelToggle.setAttribute('aria-expanded', String(open));
+    // 震源域の地図凡例はパネル（スマホでは下部シート）の直上に置く。閉じたら画面下端へ寄せる
+    document.getElementById('slipLegend')?.classList.toggle('panel-collapsed', !open);
   }
   panelToggle.addEventListener('click', () => setPanelOpen(panel.hidden));
 
   // ---- 初期化 --------------------------------------------------------------------
   buildPrefOptions();
   buildPresets();
+  buildCaseOptions();
+  buildIntensityOptions();
 
   const fromUrl = readUrl();
   applyPartial(fromUrl);
@@ -516,7 +651,7 @@ export function initUi(
   } else if (state.muniCode && heightExplicit && !initial.preset) {
     // 明示的な高さがプリセット値と一致すればそのプリセットを点灯、そうでなければ手動
     const row = findRow(state.muniCode);
-    const hit = PRESET_ORDER.find((p) => p !== 'manual' && presetValue(row, p) === state.heightM);
+    const hit = PRESET_ORDER.find((p) => p !== 'manual' && presetValue(row, p, state.caseId) === state.heightM);
     state.preset = hit ?? 'manual';
   } else if (!state.muniCode && !initial.preset) {
     state.preset = 'manual';

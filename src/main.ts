@@ -3,6 +3,8 @@ import 'cesium/Build/Cesium/Widgets/widgets.css';
 import './style.css';
 import { TERRAIN_URL, GSI_PALE, GSI_PHOTO } from './tilesets';
 import { loadAll, findMunicipality, findTsunamiRow, tsunamiHeight, type AppData, type Municipality, type PlateauTileset } from './data';
+import { findCase, findIntensity } from './scenarios';
+import { createSlipOverlay, type SlipOverlay } from './slipRegions';
 import { initGeoid, geoidHeight, geoidSource, sanityCheckGeoid, GEOID_CREDIT_HTML } from './geoid';
 import { createWaterLayer, type WaterLayer } from './water';
 import { initUi, type UiState, type UiHandle } from './ui';
@@ -152,8 +154,9 @@ const state = {
 let data: AppData | undefined;
 let water: WaterLayer | undefined;
 let tilesets: TilesetManager | undefined;
+let slip: SlipOverlay | undefined;
 let uiState: UiState = {
-  muniCode: null, heightM: 5.0, preset: 'max_2025', showOfficial: false, showBuildings: true, lod2: false, imagery: 'pale', showWater: true,
+  muniCode: null, heightM: 5.0, preset: 'max_2025', caseId: null, intensity: null, showOfficial: false, showBuildings: true, lod2: false, imagery: 'pale', showWater: true,
 };
 
 // ---------------------------------------------------------------------------
@@ -169,6 +172,48 @@ function flyToMunicipality(m: Municipality, duration = 1.6) {
     offset: new Cesium.HeadingPitchRange(0, Cesium.Math.toRadians(-40), radius * 2.0),
     duration,
   });
+}
+
+/**
+ * 震源域（概略）と選択中の市区町村が一画面に入る画角へ移動。
+ * PC は左の操作パネル（--panel-w）、スマホは下部シート（--sheet-h）を避けるため、範囲をその方向へ広げてから flyTo する。
+ */
+function fitCaseAndMunicipality(duration = 1.2) {
+  const bb = slip?.bbox();
+  if (!bb) return;
+  let [w, s, e, n] = bb;
+  const m = data ? findMunicipality(data.municipalities, uiState.muniCode) : undefined;
+  if (m) { w = Math.min(w, m.bbox[0]); s = Math.min(s, m.bbox[1]); e = Math.max(e, m.bbox[2]); n = Math.max(n, m.bbox[3]); }
+  // 余白 8%
+  const pw = (e - w) * 0.08, ph = (n - s) * 0.08;
+  w -= pw; e += pw; s -= ph; n += ph;
+  const vw = window.innerWidth, vh = window.innerHeight;
+  if (vw > 640) {
+    // 左パネル分だけ西側へ広げる（パネル幅 380px + 余白）
+    const frac = Math.min(0.6, (400) / vw);
+    w -= (e - w) * (frac / (1 - frac));
+  } else {
+    // 下部シート分だけ南側へ広げる（シートを閉じているときは凡例ぶんだけ）
+    const panelOpen = !(document.getElementById('panel')?.hidden ?? false);
+    const frac = Math.min(0.6, (panelOpen ? vh * 0.58 + 60 : 110) / vh);
+    s -= (n - s) * (frac / (1 - frac));
+  }
+  viewer.camera.flyTo({
+    destination: Cesium.Rectangle.fromDegrees(w, s, e, n),
+    orientation: { heading: 0, pitch: Cesium.Math.toRadians(-90), roll: 0 },
+    duration,
+  });
+  pumpRender(duration);
+}
+
+/** requestRenderMode 下でカメラ飛行や地形クランプ描画を進めるため、一定時間フレーム描画を要求し続ける */
+function pumpRender(seconds: number) {
+  const end = performance.now() + seconds * 1000 + 300;
+  const step = () => {
+    scene.requestRender();
+    if (performance.now() < end) requestAnimationFrame(step);
+  };
+  requestAnimationFrame(step);
 }
 
 function resetView() {
@@ -286,7 +331,18 @@ let prevState: UiState | undefined;
 function applyState(s: UiState) {
   const prev = prevState;
   uiState = s;
-  water?.setState({ muniCode: s.muniCode, heightM: s.heightM, preset: s.preset, show: s.showWater });
+  water?.setState({ muniCode: s.muniCode, heightM: s.heightM, preset: s.preset, caseId: s.caseId, show: s.showWater });
+  // 震源域（大すべり域）の概略オーバーレイ: ケース選択中のみ。地図凡例も連動。ケースが変わったら一画面へ
+  const c = findCase(s.caseId);
+  if (slip && (!prev || prev.caseId !== s.caseId)) {
+    slip.setRegions(c ? c.regionKeys : []);
+    if (c && prev) fitCaseAndMunicipality();
+    else pumpRender(1.5);
+  }
+  const slipLegend = document.getElementById('slipLegend');
+  const slipLegendText = document.getElementById('slipLegendText');
+  if (slipLegend) slipLegend.hidden = !c;
+  if (slipLegendText && c) slipLegendText.textContent = `${c.label} ${c.regions}: 震源域（大すべり域・超大すべり域）の概略`;
   if (!prev || prev.imagery !== s.imagery) applyImagery(s.imagery);
   if (!prev || prev.showOfficial !== s.showOfficial) { officialLayer.show = s.showOfficial; requestRender(); }
   if (tilesets) {
@@ -305,6 +361,10 @@ function updateStatus() {
   const parts: string[] = [];
   if (tilesets) { const st = tilesets.stats(); parts.push(`建物 ${st.loaded}${st.loading ? `（+${st.loading} 読込中）` : ''}`); }
   if (water) parts.push(`水面 ${water.visibleCodes().length} 市区町村`);
+  const tc = findCase(uiState.caseId);
+  if (tc) parts.push(`${tc.label} ${tc.regions}`);
+  const lv = findIntensity(uiState.intensity);
+  if (lv) parts.push(`参考: ${lv.label}（浸水表示には影響なし）`);
   parts.push(`ジオイド: ${geoidSource() === 'gsigeo2011' ? 'GSIGEO2011' : geoidSource() === 'terrain-estimate' ? '地形推定' : '既定値'}`);
   if (data?.isFixture) parts.push('FIXTURE');
   ui.setStatus(parts.join('｜'));
@@ -318,6 +378,10 @@ function readUrlInitial(): Partial<UiState> {
   const out: Partial<UiState> = {};
   const m = q.get('m');
   if (m && /^\d{5}$/.test(m)) out.muniCode = m;
+  const c = q.get('c');
+  if (c && findCase(c)) { out.caseId = c; out.preset = 'case'; }
+  const si = q.get('si');
+  if (si && findIntensity(si)) out.intensity = si;
   const h = q.get('h');
   if (h !== null) {
     const v = parseFloat(h);
@@ -361,7 +425,9 @@ function toTmRegistry(r: AppData['registry']): TmRegistry {
   if (initial.muniCode && !initialMuni) { console.warn('[URL] 未知の市区町村コード:', initial.muniCode); initial.muniCode = undefined; }
   else if (initialMuni) initial.muniCode = initialMuni.code;
   if (initial.heightM === undefined) {
-    const h = tsunamiHeight(findTsunamiRow(data.tsunami, initial.muniCode), 'max_2025');
+    const row = findTsunamiRow(data.tsunami, initial.muniCode);
+    const cv = initial.caseId ? row?.cases_2025?.[initial.caseId] : null;
+    const h = typeof cv === 'number' && Number.isFinite(cv) ? cv : tsunamiHeight(row, 'max_2025');
     if (h !== null) initial.heightM = h;
   }
 
@@ -373,6 +439,7 @@ function toTmRegistry(r: AppData['registry']): TmRegistry {
     onChange: (s: UiState) => applyState(s),
     onFlyTo: (code: string) => { const m = data && findMunicipality(data.municipalities, code); if (m) flyToMunicipality(m); },
     onResetView: () => resetView(),
+    onFitCase: () => fitCaseAndMunicipality(),
   };
   try {
     ui = initUi({ municipalities: data.municipalities, tsunami: data.tsunami }, callbacks, initial);
@@ -407,6 +474,9 @@ function toTmRegistry(r: AppData['registry']): TmRegistry {
     onStatus: () => updateStatus(),
   });
 
+  // 5b. 震源域（大すべり域）の概略オーバーレイ
+  slip = createSlipOverlay(viewer);
+
   // 6. 初期状態の適用と視点
   applyState(ui.getState());
   viewer.camera.moveEnd.addEventListener(() => {
@@ -440,5 +510,5 @@ window.addEventListener('orientationchange', requestRender);
 // デバッグ用
 Object.assign(window as unknown as Record<string, unknown>, {
   viewer, Cesium,
-  app: { get data() { return data; }, get water() { return water; }, get tilesets() { return tilesets; }, get ui() { return ui; }, get state() { return uiState; }, geoidHeight },
+  app: { get data() { return data; }, get water() { return water; }, get tilesets() { return tilesets; }, get ui() { return ui; }, get state() { return uiState; }, get slip() { return slip; }, viewer, geoidHeight },
 });
