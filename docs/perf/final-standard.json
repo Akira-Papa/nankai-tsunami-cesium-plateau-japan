@@ -1,0 +1,104 @@
+{
+  "label": "final-standard",
+  "generated": "2026-09-03T03:52:16.854Z",
+  "query": "?m=39201&c=4",
+  "quality": "standard",
+  "chrome": "Chrome/152.0.7977.65",
+  "note": "ヘッドレスChrome（SwiftShader・ソフトウェア描画）。絶対値は実機より低い。同条件の相対比較用",
+  "pages": [
+    {
+      "viewport": "desktop-1280x800",
+      "url": "http://127.0.0.1:5285/?m=39201&c=4&q=standard",
+      "ready": true,
+      "readyMs": 2100,
+      "network": {
+        "requests": 702,
+        "bytes": 10594905,
+        "byHost": {
+          "127.0.0.1:5285": 4477659,
+          "cyberjapandata.gsi.go.jp": 4421944,
+          "tile.plateauview.mlit.go.jp": 1359893,
+          "assets.cms.plateau.reearth.io": 335409
+        },
+        "readyRequests": 183,
+        "readyBytes": 9434871,
+        "afterInteractRequests": 702,
+        "afterInteractBytes": 10594905
+      },
+      "heapMB": 47,
+      "interact": {
+        "frames": 299,
+        "avgMs": 16.637792642150437,
+        "p50Ms": 16.69999998807907,
+        "p95Ms": 18.099999994039536,
+        "maxMs": 23.400000005960464,
+        "fpsAvg": 60.10412688198702,
+        "renderAvgMs": 1.2250836118806565,
+        "renderP95Ms": 2.3999999910593033,
+        "renderMaxMs": 8,
+        "heapMB": 68.80396366119385,
+        "resolutionScale": 1,
+        "globeSSE": 2.5,
+        "quality": "standard",
+        "tilesets": {
+          "loaded": 4,
+          "loading": 0
+        },
+        "water": 30
+      },
+      "errors": [],
+      "longTasksUntilReady": {
+        "count": 1,
+        "totalMs": 124,
+        "maxMs": 124
+      }
+    },
+    {
+      "viewport": "mobile-390x844",
+      "url": "http://127.0.0.1:5285/?m=39201&c=4&q=standard",
+      "ready": true,
+      "readyMs": 1311,
+      "network": {
+        "requests": 608,
+        "bytes": 11522379,
+        "byHost": {
+          "127.0.0.1:5285": 5108012,
+          "cyberjapandata.gsi.go.jp": 3584563,
+          "tile.plateauview.mlit.go.jp": 970506,
+          "assets.cms.plateau.reearth.io": 1859298
+        },
+        "readyRequests": 142,
+        "readyBytes": 8516524,
+        "afterInteractRequests": 608,
+        "afterInteractBytes": 11522379
+      },
+      "heapMB": 49.4,
+      "interact": {
+        "frames": 299,
+        "avgMs": 16.643143812699062,
+        "p50Ms": 16.69999998807907,
+        "p95Ms": 18,
+        "maxMs": 20.100000008940697,
+        "fpsAvg": 60.08480196133253,
+        "renderAvgMs": 1.0434782607200552,
+        "renderP95Ms": 2.1000000089406967,
+        "renderMaxMs": 5.4000000059604645,
+        "heapMB": 62.456674575805664,
+        "resolutionScale": 0.63,
+        "globeSSE": 2.5,
+        "quality": "standard",
+        "tilesets": {
+          "loaded": 5,
+          "loading": 0
+        },
+        "water": 30
+      },
+      "errors": [],
+      "longTasksUntilReady": {
+        "count": 1,
+        "totalMs": 123,
+        "maxMs": 123
+      }
+    }
+  ]
+}

@@ -105,6 +105,55 @@
     <!-- 通知バナー（ui.setBanner）。タップで閉じる -->
     <div id="banner" class="banner" role="status" aria-live="polite" hidden></div>
 
+    <!-- 操作方法（常設ボタン＋モーダル。ui.ts が開閉・フォーカス管理） -->
+    <button id="helpBtn" class="help-btn" type="button" aria-haspopup="dialog" aria-controls="helpModal" aria-expanded="false" title="操作方法を表示">
+      <span class="help-btn-icon" aria-hidden="true">？</span><span class="help-btn-label">操作方法</span>
+    </button>
+    <div id="helpModal" class="help-modal" role="dialog" aria-modal="true" aria-labelledby="helpTitle" hidden>
+      <div class="help-box" role="document">
+        <div class="help-head">
+          <h2 id="helpTitle">操作方法</h2>
+          <button id="helpClose" type="button" class="help-close" aria-label="操作方法を閉じる">×</button>
+        </div>
+        <div class="help-cols">
+          <section>
+            <h3>🖱 マウス・トラックパッド</h3>
+            <ul>
+              <li><b>移動</b>: 左ドラッグ（トラックパッドは1本指ドラッグ）</li>
+              <li><b>拡大・縮小</b>: ホイール／2本指スクロール、または右ドラッグ上下</li>
+              <li><b>回転・傾き</b>: 中ドラッグ、または Ctrl＋左ドラッグ</li>
+            </ul>
+          </section>
+          <section>
+            <h3>📱 タッチ（スマホ・タブレット）</h3>
+            <ul>
+              <li><b>移動</b>: 1本指でドラッグ</li>
+              <li><b>拡大・縮小</b>: 2本指でピンチ</li>
+              <li><b>傾き</b>: 2本指を同じ方向に上下スライド ／ <b>回転</b>: 2本指をひねる</li>
+            </ul>
+          </section>
+          <section>
+            <h3>🗺 表示の選び方</h3>
+            <ul>
+              <li><b>市区町村</b>: 左パネル（スマホは下のパネル）で都道府県→市区町村を選ぶか、名前で検索。「この市町村へ移動」でその場所へ</li>
+              <li><b>津波ケース</b>: 「津波ケース」で内閣府の公式ケース①〜⑪を選ぶと、地図に<span class="help-red">赤い震源域（概略）</span>が出て、その市区町村のケース別津波高が水面に反映されます</li>
+              <li><b>震源域を見る</b>: 「震源域と市区町村を一画面に」で両方が入る画角へ。赤い範囲は公式の区域名に対応する目安で、正確な座標・断層線ではありません</li>
+              <li><b>津波の高さ</b>: プリセット（2025最大／平均／2012最大／ケース別）かスライダーで指定</li>
+              <li><b>浸水深</b>: 地図をタップ（クリック）するとその地点の標高と浸水深を表示</li>
+            </ul>
+          </section>
+          <section>
+            <h3>↺ 初期位置に戻る</h3>
+            <ul>
+              <li>パネルの<b>「視点リセット」</b>で、選択中の市区町村（未選択なら南海トラフ沿岸全体）へ戻ります</li>
+              <li><b>Esc</b> または背景をクリックでこの案内を閉じます</li>
+            </ul>
+          </section>
+        </div>
+        <p class="help-foot">簡易可視化であり公式想定ではありません。避難判断は各自治体のハザードマップを参照してください。</p>
+      </div>
+    </div>
+
     <!-- タップ地点の浸水深リードアウト（ui.setReadout）。初回計測までは案内文を表示 -->
     <div id="readoutHint" class="readout-hint" aria-hidden="true">地図をタップ → その地点の浸水深を表示</div>
     <div id="readout" class="readout" role="status" aria-live="polite" title="タップで閉じる" hidden></div>
@@ -232,6 +281,16 @@
             </div>
             <label class="chk"><input id="waterToggle" type="checkbox" checked /> 水面を表示</label>
           </div>
+        </div>
+        <div class="field quality-row">
+          <label for="qualitySelect">表示品質</label>
+          <select id="qualitySelect" class="select" aria-describedby="qualityNote">
+            <option value="auto">自動（端末に合わせる）</option>
+            <option value="high">高画質（PC向け）</option>
+            <option value="standard">標準</option>
+            <option value="lite">軽量（スマホ・重い時）</option>
+          </select>
+          <span id="qualityNote" class="muted count">自動判定: —</span>
         </div>
       </section>
 

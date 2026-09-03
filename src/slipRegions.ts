@@ -135,7 +135,8 @@ export function createSlipOverlay(viewer: Cesium.Viewer): SlipOverlay {
     const multi = current.length > 1;
     current.forEach((k, i) => {
       const def = SLIP_REGIONS[k];
-      const ring = regionPolygon(def);
+      const ring = regionPolygon(def).filter((p) => Number.isFinite(p[0]) && Number.isFinite(p[1]));
+      if (ring.length < 4) return;
       const positions = Cesium.Cartesian3.fromDegreesArray(ring.flat());
       ds.entities.add({
         name: `震源域（概略）: ${def.name}`,

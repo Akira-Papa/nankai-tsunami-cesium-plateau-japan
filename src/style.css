@@ -168,3 +168,38 @@ input[type="range"]::-moz-range-thumb { width: 28px; height: 28px; border-radius
   .slip-legend { left: calc(10px + var(--sal)); right: calc(10px + var(--sar)); bottom: calc(var(--sheet-h) + 56px); max-width: none; font-size: 11.5px; }
   .panel[hidden] ~ .slip-legend, .slip-legend.panel-collapsed { bottom: calc(56px + var(--sab)); }
 }
+
+/* ---------- 操作方法（常設ボタン＋モーダル） ---------- */
+.help-btn { position: fixed; z-index: 13; top: calc(10px + var(--sat)); right: calc(10px + var(--sar)); display: inline-flex; align-items: center; gap: 6px;
+  min-height: 44px; padding: 8px 12px; border-radius: 999px; border: 1px solid var(--accent); background: var(--bg); color: var(--fg); font: inherit; font-size: 13px; font-weight: 600;
+  cursor: pointer; touch-action: manipulation; box-shadow: 0 2px 8px rgba(0,0,0,.35); }
+.help-btn:hover { background: rgba(53,182,217,.25); }
+.help-btn:focus-visible { outline: 2px solid var(--accent2); outline-offset: 2px; }
+.help-btn-icon { display: inline-flex; align-items: center; justify-content: center; width: 22px; height: 22px; border-radius: 50%; background: var(--accent); color: #062430; font-weight: 800; font-size: 14px; }
+/* 操作方法ボタンの下にリードアウト類を並べる（PC: 右上） */
+.readout-hint { top: calc(60px + var(--sat)); }
+.readout { top: calc(60px + var(--sat)); }
+.banner:not([hidden]) ~ .readout, .banner:not([hidden]) ~ .readout-hint { top: calc(98px + var(--sat)); }
+.banner:not([hidden]) ~ .help-btn { top: calc(48px + var(--sat)); }
+
+.help-modal { position: fixed; inset: 0; z-index: 40; background: rgba(2, 10, 16, .6); display: flex; align-items: flex-start; justify-content: center;
+  padding: calc(64px + var(--sat)) 12px calc(12px + var(--sab)); overflow: auto; }
+.help-modal[hidden] { display: none; }
+.help-box { background: var(--bg); border: 1px solid var(--border); border-radius: 14px; padding: 14px 16px; width: 100%; max-width: 680px; box-shadow: 0 10px 40px rgba(0,0,0,.5); font-size: 13.5px; line-height: 1.6; }
+.help-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.help-head h2 { margin: 0; font-size: 17px; }
+.help-close { appearance: none; border: 1px solid var(--border); background: rgba(255,255,255,.06); color: var(--fg); font-size: 22px; line-height: 1; width: 44px; height: 44px; border-radius: 10px; cursor: pointer; touch-action: manipulation; }
+.help-close:focus-visible, .help-box a:focus-visible { outline: 2px solid var(--accent2); outline-offset: 2px; }
+.help-cols { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 6px 18px; margin-top: 8px; }
+.help-cols h3 { margin: 8px 0 4px; font-size: 13px; color: var(--accent); }
+.help-cols ul { margin: 0; padding-left: 18px; }
+.help-cols li { margin: 2px 0; }
+.help-red { color: #ff9a9a; font-weight: 700; }
+.help-foot { margin: 10px 0 0; padding-top: 8px; border-top: 1px solid var(--border); color: var(--muted); font-size: 12px; }
+@media (max-width: 640px) {
+  .help-btn { top: calc(10px + var(--sat)); right: calc(10px + var(--sar)); }
+  .help-btn-label { display: none; }
+  .help-btn { padding: 8px 10px; }
+  .help-modal { padding: calc(60px + var(--sat)) 8px calc(8px + var(--sab)); }
+  .help-box { font-size: 13px; }
+}

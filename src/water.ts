@@ -28,8 +28,13 @@ export interface WaterState {
 }
 
 export interface WaterOptions {
+  /** 起動時に既に持っているポリゴン（空でよい。県別は `loadPref` で遅延取得） */
   geojson: MunicipalitiesGeoJSON;
   tsunami: TsunamiFile;
+  /** 都道府県ごとの範囲（表示範囲と交差した県のポリゴンだけを読む） */
+  prefBBoxes?: Record<string, BBox>;
+  /** 県別ポリゴンの遅延取得（null = 取得失敗） */
+  loadPref?: (prefCode: string) => Promise<MunicipalitiesGeoJSON | null>;
   geoidFn: (lon: number, lat: number) => number;
   /** 同時に存在させるエンティティ上限（既定 40） */
   maxEntities?: number;
@@ -74,32 +79,62 @@ const GRANULARITY = Cesium.Math.toRadians(0.01);
 const MAX_RING_VERTICES = 6000;
 
 function ringToPositions(ring: Position[]): Cesium.Cartesian3[] {
-  // 閉環の末尾重複は Cesium 側で問題ないが、同一点連続は除去しておく
+  // 閉環の末尾重複は Cesium 側で問題ないが、同一点連続は除去しておく。非数の座標は捨てる
   const step = ring.length > MAX_RING_VERTICES ? Math.ceil(ring.length / MAX_RING_VERTICES) : 1;
   const out: Cesium.Cartesian3[] = [];
   let prev: Position | undefined;
   for (let i = 0; i < ring.length; i += step) {
     const p = ring[i];
+    if (!Number.isFinite(p[0]) || !Number.isFinite(p[1])) continue;
     if (prev && prev[0] === p[0] && prev[1] === p[1]) continue;
     out.push(Cesium.Cartesian3.fromDegrees(p[0], p[1], 0));
     prev = p;
   }
-  return out;
+  // 閉環で先頭と末尾が同一なら末尾を落とし、実質 3 点未満（退化形状）は無効
+  if (out.length >= 2 && Cesium.Cartesian3.equals(out[0], out[out.length - 1])) out.pop();
+  return out.length >= 3 ? out : [];
 }
 
 function polygonToPart(rings: Position[][]): PolyPart | null {
   if (!rings.length || rings[0].length < 4) return null;
   const outer = ringToPositions(rings[0]);
   if (outer.length < 3) return null;
-  const holes = rings.slice(1).map((r) => new Cesium.PolygonHierarchy(ringToPositions(r))).filter((h) => h.positions.length >= 3);
+  const c0 = polygonToPartCentroid(rings[0]);
+  if (!c0) return null;
+  // 面積ゼロ（共線・潰れた小島）の環は除外。Cesium の PolygonGeometryUpdater は靴紐公式の重心を
+  // TerrainOffsetProperty に使うため、面積 0 だと NaN になり「Rendering has stopped」で描画が止まる
+  const holes = rings.slice(1)
+    .filter((r) => ringArea(r) > MIN_RING_AREA)
+    .map((r) => new Cesium.PolygonHierarchy(ringToPositions(r)))
+    .filter((h) => h.positions.length >= 3);
+  return { hierarchy: new Cesium.PolygonHierarchy(outer, holes), bbox: c0.bbox, centroid: c0.centroid };
+}
+
+/** 平面近似の面積（度²・絶対値）。退化形状の判定用 */
+function ringArea(ring: Position[]): number {
+  let a = 0;
+  for (let i = 0, n = ring.length; i < n; i++) {
+    const p = ring[i], q = ring[(i + 1) % n];
+    if (!Number.isFinite(p[0]) || !Number.isFinite(p[1]) || !Number.isFinite(q[0]) || !Number.isFinite(q[1])) return 0;
+    a += p[0] * q[1] - q[0] * p[1];
+  }
+  return Math.abs(a) / 2;
+}
+/** 4 桁丸め（約 11 m）の座標で 3 点が潰れると面積は 1e-8 度² 未満になる。安全側に 1e-9 を下限とする */
+const MIN_RING_AREA = 1e-9;
+
+function polygonToPartCentroid(ring: Position[]): { bbox: BBox; centroid: { lon: number; lat: number } } | null {
+  if (ringArea(ring) <= MIN_RING_AREA) return null;
   let sx = 0, sy = 0, n = 0;
   let w = Infinity, s = Infinity, e = -Infinity, no = -Infinity;
-  for (const p of rings[0]) {
+  for (const p of ring) {
+    if (!Number.isFinite(p[0]) || !Number.isFinite(p[1])) continue;
     sx += p[0]; sy += p[1]; n++;
     if (p[0] < w) w = p[0]; if (p[0] > e) e = p[0];
     if (p[1] < s) s = p[1]; if (p[1] > no) no = p[1];
   }
-  return { hierarchy: new Cesium.PolygonHierarchy(outer, holes), bbox: [w, s, e, no], centroid: { lon: sx / n, lat: sy / n } };
+  if (n === 0 || !(e > w) || !(no > s)) return null; // 幅または高さが 0 の退化形状
+  return { bbox: [w, s, e, no], centroid: { lon: sx / n, lat: sy / n } };
 }
 
 function featureToShape(f: MunicipalityFeature): MuniShape | null {
@@ -114,12 +149,32 @@ export function createWaterLayer(viewer: Cesium.Viewer, opts: WaterOptions): Wat
   const maxEntities = opts.maxEntities ?? 40;
   const margin = opts.marginDeg ?? 0.15;
   const shapes: MuniShape[] = [];
-  for (const f of opts.geojson.features) {
-    const s = featureToShape(f);
-    if (s) shapes.push(s);
-    else console.warn('[水面] ジオメトリを変換できません:', f.properties?.code, f.properties?.name);
+  const byCode = new Map<string, MuniShape>();
+  function addFeatures(fc: MunicipalitiesGeoJSON) {
+    for (const f of fc.features) {
+      if (byCode.has(f.properties.code)) continue;
+      const s = featureToShape(f);
+      if (s) { shapes.push(s); byCode.set(s.code, s); }
+      else console.warn('[水面] ジオメトリを変換できません:', f.properties?.code, f.properties?.name);
+    }
   }
-  const byCode = new Map(shapes.map((s) => [s.code, s]));
+  addFeatures(opts.geojson);
+  /** 県別ポリゴンの読込状態（'loading' | 'done' | 'failed'） */
+  const prefState = new Map<string, 'loading' | 'done' | 'failed'>();
+  function ensurePrefs(view: BBox) {
+    if (!opts.prefBBoxes || !opts.loadPref) return;
+    for (const [pref, bb] of Object.entries(opts.prefBBoxes)) {
+      if (prefState.has(pref) || !bboxIntersects(bb, view, margin)) continue;
+      prefState.set(pref, 'loading');
+      opts.onStatus?.(`水面: 県別ポリゴン読込中（${pref}）`);
+      void opts.loadPref(pref).then((fc) => {
+        if (!fc) { prefState.set(pref, 'failed'); return; }
+        prefState.set(pref, 'done');
+        addFeatures(fc);
+        refresh(true);
+      });
+    }
+  }
 
   const state: WaterState = { muniCode: null, heightM: 3.0, preset: 'max_2025', show: true };
   const ds = new Cesium.CustomDataSource('津波水面');
@@ -154,7 +209,13 @@ export function createWaterLayer(viewer: Cesium.Viewer, opts: WaterOptions): Wat
         const key = `${code}#${i}`;
         heightCache.set(key, tp + opts.geoidFn(part.centroid.lon, part.centroid.lat));
         const poly = ent.polygon;
-        if (poly) poly.material = new Cesium.ColorMaterialProperty(code === state.muniCode ? WATER_COLOR_SELECTED : WATER_COLOR);
+        if (poly) {
+          // 高さは定数プロパティ（CallbackProperty だと毎フレーム形状を再生成し操作が重くなる）
+          const h = heightCache.get(key) ?? 0;
+          const cur = poly.height?.getValue(Cesium.JulianDate.now()) as number | undefined;
+          if (cur !== h) poly.height = new Cesium.ConstantProperty(h);
+          poly.material = new Cesium.ColorMaterialProperty(code === state.muniCode ? WATER_COLOR_SELECTED : WATER_COLOR);
+        }
       });
     }
     viewer.scene.requestRender();
@@ -176,7 +237,7 @@ export function createWaterLayer(viewer: Cesium.Viewer, opts: WaterOptions): Wat
         show: state.show,
         polygon: {
           hierarchy: part.hierarchy,
-          height: new Cesium.CallbackProperty(() => heightCache.get(key) ?? 0, false),
+          height: new Cesium.ConstantProperty(heightCache.get(key) ?? (tpHeightFor(shape.code) + opts.geoidFn(part.centroid.lon, part.centroid.lat))),
           heightReference: Cesium.HeightReference.NONE,
           granularity: GRANULARITY,
           material: shape.code === state.muniCode ? WATER_COLOR_SELECTED : WATER_COLOR,
@@ -206,9 +267,18 @@ export function createWaterLayer(viewer: Cesium.Viewer, opts: WaterOptions): Wat
     return [Cesium.Math.toDegrees(use.west), Cesium.Math.toDegrees(use.south), Cesium.Math.toDegrees(use.east), Cesium.Math.toDegrees(use.north)];
   }
 
+  /** これより広い視野（度）では水面を出さない（全国俯瞰で全県ポリゴンを読み込まないため） */
+  const MAX_VIEW_SPAN_DEG = 5;
+
   function refresh(force = false) {
     const view = currentViewBBox();
     if (!view) return;
+    if (view[2] - view[0] > MAX_VIEW_SPAN_DEG || view[3] - view[1] > MAX_VIEW_SPAN_DEG) {
+      for (const code of [...live.keys()]) destroyEntities(code);
+      opts.onStatus?.('水面: 広域のため非表示（ズームすると表示）');
+      return;
+    }
+    ensurePrefs(view);
     const cx = (view[0] + view[2]) / 2, cy = (view[1] + view[3]) / 2;
     // 表示範囲と交差する市区町村を、視点中心に近い順に並べて上限まで採用（選択中は常に優先）
     const candidates = shapes

@@ -2,7 +2,8 @@ import * as Cesium from 'cesium';
 import 'cesium/Build/Cesium/Widgets/widgets.css';
 import './style.css';
 import { TERRAIN_URL, GSI_PALE, GSI_PHOTO } from './tilesets';
-import { loadAll, findMunicipality, findTsunamiRow, tsunamiHeight, type AppData, type Municipality, type PlateauTileset } from './data';
+import { loadAll, loadCoastalPref, findMunicipality, findTsunamiRow, tsunamiHeight, type AppData, type Municipality, type PlateauTileset, type BBox } from './data';
+import { detectQuality, applySceneQuality, QUALITY_PROFILES, type QualityLevel, type QualityProfile } from './quality';
 import { findCase, findIntensity } from './scenarios';
 import { createSlipOverlay, type SlipOverlay } from './slipRegions';
 import { initGeoid, geoidHeight, geoidSource, sanityCheckGeoid, GEOID_CREDIT_HTML } from './geoid';
@@ -20,9 +21,10 @@ const OFFICIAL_TSUNAMI_URL = 'https://disaportaldata.gsi.go.jp/raster/04_tsunami
 const OFFICIAL_ALPHA = 0.6;
 const DISCLAIMER =
   '簡易可視化であり公式想定ではありません。内閣府の津波高は海岸線での最大値で、内陸へ一律に適用すると過大・過小になります。避難判断は各自治体のハザードマップを参照してください';
-const TILESET_MAX_CONCURRENT = 3;
-
-const isPhone = window.matchMedia('(max-width: 640px)').matches;
+// ---- 表示品質（端末に応じて自動判定。UI の「表示品質」で上書き・保存） ----
+const detected = detectQuality();
+let quality: QualityProfile = QUALITY_PROFILES[detected.level];
+let tilesetsUpdateTimer = 0;
 
 // ---------------------------------------------------------------------------
 // 外部由来エラーのフィルタ（ブラウザ拡張など）
@@ -124,14 +126,16 @@ function createViewer(): Cesium.Viewer {
 
 const viewer = createViewer();
 const scene = viewer.scene;
+// 描画停止（Cesium の renderError）は黙らせず、原因をコンソールとバナーに出す
+scene.renderError.addEventListener((_s: unknown, err: unknown) => {
+  console.error('[Cesium renderError]', err);
+  showBanner(`3D描画でエラーが発生しました: ${String((err as Error)?.message ?? err)}。ページを再読み込みしてください。`, 'error');
+});
 scene.globe.depthTestAgainstTerrain = true;
 scene.shadowMap.enabled = false;
-scene.fog.enabled = true;
-if (scene.skyAtmosphere) scene.skyAtmosphere.show = true;
+applySceneQuality(viewer, quality);
 scene.globe.enableLighting = false;
-viewer.resolutionScale = Math.min(1, 1.5 / (window.devicePixelRatio || 1));
 scene.screenSpaceCameraController.minimumZoomDistance = 30;
-if (isPhone) scene.globe.maximumScreenSpaceError = 3;
 viewer.screenSpaceEventHandler.removeInputAction(Cesium.ScreenSpaceEventType.LEFT_DOUBLE_CLICK);
 
 viewer.creditDisplay.addStaticCredit(new Cesium.Credit('PLATEAU（国土交通省）｜内閣府 南海トラフ巨大地震モデル検討会｜国土地理院', true));
@@ -156,8 +160,69 @@ let water: WaterLayer | undefined;
 let tilesets: TilesetManager | undefined;
 let slip: SlipOverlay | undefined;
 let uiState: UiState = {
-  muniCode: null, heightM: 5.0, preset: 'max_2025', caseId: null, intensity: null, showOfficial: false, showBuildings: true, lod2: false, imagery: 'pale', showWater: true,
+  muniCode: null, heightM: 5.0, preset: 'max_2025', caseId: null, intensity: null, showOfficial: false, showBuildings: true, lod2: false, imagery: 'pale', showWater: true, quality: 'auto',
 };
+
+/** 都道府県ごとの範囲（沿岸・対象市区町村の bbox の和）。県別ポリゴンの遅延読込判定に使う */
+function prefBBoxes(d: AppData): Record<string, BBox> {
+  const out: Record<string, BBox> = {};
+  for (const m of d.municipalities.municipalities) {
+    if (!(m.coastal || m.nankai_target)) continue;
+    const b = out[m.pref_code];
+    out[m.pref_code] = b
+      ? [Math.min(b[0], m.bbox[0]), Math.min(b[1], m.bbox[1]), Math.max(b[2], m.bbox[2]), Math.max(b[3], m.bbox[3])]
+      : [...m.bbox] as BBox;
+  }
+  return out;
+}
+
+function effectiveQualityLevel(sel: UiState['quality']): QualityLevel {
+  return sel === 'auto' ? detected.level : sel;
+}
+
+/** 品質を切り替え、建物・水面レイヤを新しい上限で作り直す */
+function rebuildForQuality(level: QualityLevel) {
+  quality = QUALITY_PROFILES[level];
+  applySceneQuality(viewer, quality);
+  if (data) {
+    tilesets?.dispose();
+    tilesets = undefined;
+    try {
+      tilesets = createTilesetManager(viewer, {
+        registry: toTmRegistry(data.registry),
+        maxConcurrent: quality.tilesetMaxConcurrent,
+        maxLoaded: quality.tilesetMaxLoaded,
+        maxCameraHeight: quality.tilesetMaxCameraHeight,
+        mobile: quality.tilesetMobileProfile,
+        lod2: uiState.lod2,
+        onStatus: () => updateStatus(),
+      });
+      tilesets.setEnabled(uiState.showBuildings);
+    } catch (e) { console.warn('[建物] 再構成に失敗:', e); }
+    water?.dispose();
+    water = createWaterLayer(viewer, {
+      geojson: data.coastal,
+      tsunami: data.tsunami,
+      geoidFn: geoidHeight,
+      maxEntities: quality.waterMaxEntities,
+      prefBBoxes: prefBBoxes(data),
+      loadPref: (code) => loadCoastalPref(code),
+      onStatus: () => updateStatus(),
+    });
+    water.setState({ muniCode: uiState.muniCode, heightM: uiState.heightM, preset: uiState.preset, caseId: uiState.caseId, show: uiState.showWater });
+    water.refresh(true);
+    scheduleTilesetUpdate(300);
+  }
+  ui?.setQualityNote?.(`${quality.label}（自動判定: ${QUALITY_PROFILES[detected.level].label}／${detected.reasons.join('・')}）`);
+  updateStatus();
+  requestRender();
+}
+
+/** 建物 3D Tiles の読込判定は視点が落ち着いてから（連続操作中に全国分の要求を出さない） */
+function scheduleTilesetUpdate(delayMs = 450) {
+  window.clearTimeout(tilesetsUpdateTimer);
+  tilesetsUpdateTimer = window.setTimeout(() => { tilesets?.update(); updateStatus(); }, delayMs);
+}
 
 // ---------------------------------------------------------------------------
 // 視点
@@ -232,7 +297,7 @@ function resetView() {
 async function setupTerrain(): Promise<boolean> {
   try {
     const terrain = await Cesium.CesiumTerrainProvider.fromUrl(TERRAIN_URL, {
-      requestVertexNormals: true,
+      requestVertexNormals: quality.terrainVertexNormals,
       credit: new Cesium.Credit('PLATEAU | Mapterhorn | 国土地理院', false),
     });
     viewer.terrainProvider = terrain;
@@ -331,6 +396,7 @@ let prevState: UiState | undefined;
 function applyState(s: UiState) {
   const prev = prevState;
   uiState = s;
+  if (prev && effectiveQualityLevel(prev.quality) !== effectiveQualityLevel(s.quality)) rebuildForQuality(effectiveQualityLevel(s.quality));
   water?.setState({ muniCode: s.muniCode, heightM: s.heightM, preset: s.preset, caseId: s.caseId, show: s.showWater });
   // 震源域（大すべり域）の概略オーバーレイ: ケース選択中のみ。地図凡例も連動。ケースが変わったら一画面へ
   const c = findCase(s.caseId);
@@ -365,6 +431,7 @@ function updateStatus() {
   if (tc) parts.push(`${tc.label} ${tc.regions}`);
   const lv = findIntensity(uiState.intensity);
   if (lv) parts.push(`参考: ${lv.label}（浸水表示には影響なし）`);
+  parts.push(`品質: ${quality.label}`);
   parts.push(`ジオイド: ${geoidSource() === 'gsigeo2011' ? 'GSIGEO2011' : geoidSource() === 'terrain-estimate' ? '地形推定' : '既定値'}`);
   if (data?.isFixture) parts.push('FIXTURE');
   ui.setStatus(parts.join('｜'));
@@ -452,11 +519,19 @@ function toTmRegistry(r: AppData['registry']): TmRegistry {
   else ui.setBanner(DISCLAIMER, 'warn');
   if (!geoidOk) ui.setBanner('ジオイドモデル（japan-geoid）を初期化できませんでした。地形推定または既定値で水面高を計算します（誤差あり）。', 'warn');
 
+  // 3b. 表示品質（保存済み／URL の指定があれば自動判定より優先）
+  quality = QUALITY_PROFILES[effectiveQualityLevel(ui.getState().quality)];
+  applySceneQuality(viewer, quality);
+  ui.setQualityNote?.(`${quality.label}（自動判定: ${QUALITY_PROFILES[detected.level].label}／${detected.reasons.join('・')}）`);
+
   // 4. 建物（A2）
   try {
     tilesets = createTilesetManager(viewer, {
       registry: toTmRegistry(data.registry),
-      maxConcurrent: TILESET_MAX_CONCURRENT,
+      maxConcurrent: quality.tilesetMaxConcurrent,
+      maxLoaded: quality.tilesetMaxLoaded,
+      maxCameraHeight: quality.tilesetMaxCameraHeight,
+      mobile: quality.tilesetMobileProfile,
       lod2: ui.getState().lod2,
       onStatus: () => updateStatus(),
     });
@@ -470,7 +545,9 @@ function toTmRegistry(r: AppData['registry']): TmRegistry {
     geojson: data.coastal,
     tsunami: data.tsunami,
     geoidFn: geoidHeight,
-    maxEntities: isPhone ? 24 : 40,
+    maxEntities: quality.waterMaxEntities,
+    prefBBoxes: prefBBoxes(data),
+    loadPref: (code) => loadCoastalPref(code),
     onStatus: () => updateStatus(),
   });
 
@@ -480,15 +557,17 @@ function toTmRegistry(r: AppData['registry']): TmRegistry {
   // 6. 初期状態の適用と視点
   applyState(ui.getState());
   viewer.camera.moveEnd.addEventListener(() => {
-    tilesets?.update();
     water?.refresh();
     pushWaterLevelToBuildings();
     updateStatus();
+    scheduleTilesetUpdate();
   });
   if (initialMuni) flyToMunicipality(initialMuni, 0);
   else resetView();
   // flyTo(duration 0) 直後は moveEnd が来ない場合があるため明示的に 1 回更新
-  window.setTimeout(() => { tilesets?.update(); water?.refresh(true); pushWaterLevelToBuildings(); updateStatus(); requestRender(); }, 50);
+  window.setTimeout(() => { water?.refresh(true); pushWaterLevelToBuildings(); updateStatus(); requestRender(); }, 50);
+  // 建物は地形・水面の初期読込を優先し、視点が落ち着いてから読み込む
+  scheduleTilesetUpdate(1500);
 
   // 7. ジオイド健全性チェック（選択市区町村の代表点。未選択時は省略）
   if (initialMuni && state.terrainOk) {
@@ -510,5 +589,5 @@ window.addEventListener('orientationchange', requestRender);
 // デバッグ用
 Object.assign(window as unknown as Record<string, unknown>, {
   viewer, Cesium,
-  app: { get data() { return data; }, get water() { return water; }, get tilesets() { return tilesets; }, get ui() { return ui; }, get state() { return uiState; }, get slip() { return slip; }, viewer, geoidHeight },
+  app: { get data() { return data; }, get water() { return water; }, get tilesets() { return tilesets; }, get ui() { return ui; }, get state() { return uiState; }, get slip() { return slip; }, viewer, geoidHeight, quality: () => quality.level, detected },
 });

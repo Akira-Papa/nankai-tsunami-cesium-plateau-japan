@@ -59,6 +59,9 @@ export interface TsunamiFile {
 /** `case` = 上で選んだ内閣府 津波ケース（①〜⑪）の市町村別最大津波高 */
 export type Preset = 'max_2025' | 'mean_2025' | 'max_2012' | 'case' | 'manual';
 export type Imagery = 'pale' | 'photo';
+/** 表示品質。auto = 端末性能から自動判定（localStorage に保存） */
+export type Quality = 'auto' | 'high' | 'standard' | 'lite';
+export const QUALITY_STORAGE_KEY = 'nankai-cesium.quality';
 
 export interface UiState {
   muniCode: string | null;
@@ -73,6 +76,7 @@ export interface UiState {
   lod2: boolean;
   imagery: Imagery;
   showWater: boolean;
+  quality: Quality;
 }
 
 export interface UiCallbacks {
@@ -89,6 +93,8 @@ export interface UiHandle {
   setBanner(msg: string | null, level?: 'warn' | 'error'): void;
   setReadout(text: string | null): void;
   getState(): UiState;
+  /** 品質セレクタ横の補足（例: 自動判定の結果） */
+  setQualityNote?(text: string): void;
 }
 
 /** スライダーの範囲（DATA_CONTRACT §6: 0〜35 m・0.1 刻み） */
@@ -116,6 +122,7 @@ const DEFAULT_STATE: UiState = {
   lod2: false,
   imagery: 'pale',
   showWater: true,
+  quality: 'auto',
 };
 
 // ---------------------------------------------------------------------------
@@ -245,6 +252,8 @@ export function initUi(
   const imageryPale = $<HTMLInputElement>('imageryPale');
   const imageryPhoto = $<HTMLInputElement>('imageryPhoto');
   const waterToggle = $<HTMLInputElement>('waterToggle');
+  const qualitySelect = $<HTMLSelectElement>('qualitySelect');
+  const qualityNote = $<HTMLElement>('qualityNote');
   const resetViewBtn = $<HTMLButtonElement>('resetView');
 
   const statusEl = $<HTMLElement>('status');
@@ -273,6 +282,8 @@ export function initUi(
       if (c && findCase(c)) { out.caseId = c; out.preset = 'case'; }
       const si = q.get('si');
       if (si && findIntensity(si)) out.intensity = si;
+      const qq = q.get('q');
+      if (qq && ['auto', 'high', 'standard', 'lite'].includes(qq)) out.quality = qq as Quality;
       const h = q.get('h');
       if (h !== null && h !== '') {
         const v = parseFloat(h);
@@ -306,6 +317,7 @@ export function initUi(
     if (typeof p.lod2 === 'boolean') state.lod2 = p.lod2;
     if (p.imagery === 'pale' || p.imagery === 'photo') state.imagery = p.imagery;
     if (typeof p.showWater === 'boolean') state.showWater = p.showWater;
+    if (p.quality && ['auto', 'high', 'standard', 'lite'].includes(p.quality)) state.quality = p.quality;
   }
 
   /** プリセットに対応する津波高を state.heightM へ反映。値が無ければ手動へ落とす */
@@ -474,6 +486,7 @@ export function initUi(
     imageryPale.checked = state.imagery === 'pale';
     imageryPhoto.checked = state.imagery === 'photo';
     waterToggle.checked = state.showWater;
+    if (qualitySelect.value !== state.quality) qualitySelect.value = state.quality;
   }
 
   function render() {
@@ -621,9 +634,50 @@ export function initUi(
   imageryPale.addEventListener('change', () => { if (imageryPale.checked) { state.imagery = 'pale'; emit(); } });
   imageryPhoto.addEventListener('change', () => { if (imageryPhoto.checked) { state.imagery = 'photo'; emit(); } });
   waterToggle.addEventListener('change', () => { state.showWater = waterToggle.checked; emit(); });
+  qualitySelect.addEventListener('change', () => {
+    const q = qualitySelect.value as Quality;
+    state.quality = ['auto', 'high', 'standard', 'lite'].includes(q) ? q : 'auto';
+    try { localStorage.setItem(QUALITY_STORAGE_KEY, state.quality); } catch { /* private mode 等 */ }
+    emit();
+  });
   resetViewBtn.addEventListener('click', () => cb.onResetView());
 
   bannerEl.addEventListener('click', () => { bannerEl.hidden = true; });
+
+  // ---- 操作方法モーダル（開閉・Esc・背景クリック・フォーカストラップ） ----
+  const helpBtn = $<HTMLButtonElement>('helpBtn');
+  const helpModal = $<HTMLElement>('helpModal');
+  const helpClose = $<HTMLButtonElement>('helpClose');
+  let helpReturnFocus: HTMLElement | null = null;
+  function focusablesIn(root: HTMLElement): HTMLElement[] {
+    return Array.from(root.querySelectorAll<HTMLElement>('a[href], button:not([disabled]), [tabindex]:not([tabindex="-1"])'))
+      .filter((el) => el.offsetParent !== null);
+  }
+  function setHelpOpen(open: boolean) {
+    if (open === !helpModal.hidden) return;
+    helpModal.hidden = !open;
+    helpBtn.setAttribute('aria-expanded', String(open));
+    if (open) {
+      helpReturnFocus = (document.activeElement as HTMLElement | null) ?? helpBtn;
+      helpClose.focus();
+    } else {
+      (helpReturnFocus ?? helpBtn).focus();
+      helpReturnFocus = null;
+    }
+  }
+  helpBtn.addEventListener('click', () => setHelpOpen(helpModal.hidden));
+  helpClose.addEventListener('click', () => setHelpOpen(false));
+  helpModal.addEventListener('click', (ev) => { if (ev.target === helpModal) setHelpOpen(false); });
+  helpModal.addEventListener('keydown', (ev) => {
+    if (ev.key === 'Escape') { ev.preventDefault(); setHelpOpen(false); return; }
+    if (ev.key !== 'Tab') return;
+    const items = focusablesIn(helpModal);
+    if (!items.length) return;
+    const first = items[0], last = items[items.length - 1];
+    if (ev.shiftKey && document.activeElement === first) { ev.preventDefault(); last.focus(); }
+    else if (!ev.shiftKey && document.activeElement === last) { ev.preventDefault(); first.focus(); }
+  });
+  window.addEventListener('keydown', (ev) => { if (ev.key === 'Escape' && !helpModal.hidden) setHelpOpen(false); });
   readoutEl.addEventListener('click', () => { readoutEl.hidden = true; });
 
   function setPanelOpen(open: boolean) {
@@ -642,6 +696,10 @@ export function initUi(
   buildCaseOptions();
   buildIntensityOptions();
 
+  try {
+    const saved = localStorage.getItem(QUALITY_STORAGE_KEY);
+    if (saved && ['auto', 'high', 'standard', 'lite'].includes(saved)) state.quality = saved as Quality;
+  } catch { /* ignore */ }
   const fromUrl = readUrl();
   applyPartial(fromUrl);
   applyPartial(initial);
@@ -682,6 +740,7 @@ export function initUi(
       bannerEl.title = 'タップで閉じる';
       bannerEl.hidden = false;
     },
+    setQualityNote(text) { qualityNote.textContent = text ?? ''; },
     setReadout(text) {
       if (text === null || text === '') { readoutEl.hidden = true; readoutEl.replaceChildren(); return; }
       readoutHint.hidden = true;

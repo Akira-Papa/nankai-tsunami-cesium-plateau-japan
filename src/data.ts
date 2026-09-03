@@ -198,15 +198,32 @@ export function isPlateauRegistry(v: unknown): v is PlateauRegistry {
  */
 export async function loadAll(base: string = `${import.meta.env.BASE_URL}data/`): Promise<AppData> {
   const b = base.endsWith('/') ? base : `${base}/`;
-  const [municipalities, coastal, tsunami, registry] = await Promise.all([
+  // 沿岸ポリゴンは一枚ファイル（14.7 MB）を起動時に読まず、都道府県別 `coastal/{pref_code}.geojson` を
+  // 表示範囲に応じて `loadCoastalPref()` で遅延取得する（初期表示の転送量・パース時間対策）
+  const [municipalities, tsunami, registry] = await Promise.all([
     fetchJson(b + DATA_FILES.municipalities, DATA_FILES.municipalities, isMunicipalitiesFile),
-    fetchJson(b + DATA_FILES.coastal, DATA_FILES.coastal, isMunicipalitiesGeoJSON),
     fetchJson(b + DATA_FILES.tsunami, DATA_FILES.tsunami, isTsunamiFile),
     fetchJson(b + DATA_FILES.registry, DATA_FILES.registry, isPlateauRegistry),
   ]);
-  const isFixture = !!(municipalities.fixture || coastal.fixture || tsunami.fixture || registry.fixture);
+  const coastal: MunicipalitiesGeoJSON = { type: 'FeatureCollection', features: [] };
+  const isFixture = !!(municipalities.fixture || tsunami.fixture || registry.fixture);
   if (isFixture) console.warn('[data] フィクスチャデータ（6市町村）で動作しています。統合時に shared/data/ の実データへ置き換えてください。');
   return { municipalities, coastal, tsunami, registry, isFixture };
+}
+
+const coastalPrefCache = new Map<string, Promise<MunicipalitiesGeoJSON | null>>();
+
+/**
+ * 都道府県別の沿岸ポリゴン `coastal/{pref_code}.geojson` を取得する（同じ県は1回だけ。失敗時 null）。
+ */
+export function loadCoastalPref(prefCode: string, base: string = `${import.meta.env.BASE_URL}data/`): Promise<MunicipalitiesGeoJSON | null> {
+  const cached = coastalPrefCache.get(prefCode);
+  if (cached) return cached;
+  const b = base.endsWith('/') ? base : `${base}/`;
+  const p = fetchJson(`${b}coastal/${prefCode}.geojson`, `coastal/${prefCode}.geojson`, isMunicipalitiesGeoJSON)
+    .catch((e) => { console.warn('[coastal]', prefCode, e); coastalPrefCache.delete(prefCode); return null; });
+  coastalPrefCache.set(prefCode, p);
+  return p;
 }
 
 // ---------------------------------------------------------------------------

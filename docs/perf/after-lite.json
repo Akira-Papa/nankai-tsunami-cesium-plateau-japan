@@ -1,0 +1,106 @@
+{
+  "label": "after-lite",
+  "generated": "2026-09-03T03:47:39.278Z",
+  "query": "?m=39201&c=4",
+  "quality": "lite",
+  "chrome": "Chrome/152.0.7977.65",
+  "note": "ヘッドレスChrome（SwiftShader・ソフトウェア描画）。絶対値は実機より低い。同条件の相対比較用",
+  "pages": [
+    {
+      "viewport": "desktop-1280x800",
+      "url": "http://127.0.0.1:5285/?m=39201&c=4&q=lite",
+      "ready": true,
+      "readyMs": 1852,
+      "network": {
+        "requests": 635,
+        "bytes": 9171654,
+        "byHost": {
+          "127.0.0.1:5285": 4477547,
+          "cyberjapandata.gsi.go.jp": 3599901,
+          "tile.plateauview.mlit.go.jp": 780941,
+          "assets.cms.plateau.reearth.io": 312468,
+          "cyberjapandata2.gsi.go.jp": 797
+        },
+        "readyRequests": 139,
+        "readyBytes": 8252674,
+        "afterInteractRequests": 635,
+        "afterInteractBytes": 9171654
+      },
+      "heapMB": 46.9,
+      "interact": {
+        "frames": 299,
+        "avgMs": 16.64849498324769,
+        "p50Ms": 16.700000002980232,
+        "p95Ms": 18.30000001192093,
+        "maxMs": 22.200000002980232,
+        "fpsAvg": 60.06548946353623,
+        "renderAvgMs": 1.3163879595971029,
+        "renderP95Ms": 2.7000000029802322,
+        "renderMaxMs": 8.299999997019768,
+        "heapMB": 45.12911510467529,
+        "resolutionScale": 0.85,
+        "globeSSE": 4,
+        "quality": "lite",
+        "tilesets": {
+          "loaded": 3,
+          "loading": 0
+        },
+        "water": 16
+      },
+      "errors": [],
+      "longTasksUntilReady": {
+        "count": 2,
+        "totalMs": 212,
+        "maxMs": 121
+      }
+    },
+    {
+      "viewport": "mobile-390x844",
+      "url": "http://127.0.0.1:5285/?m=39201&c=4&q=lite",
+      "ready": true,
+      "readyMs": 2079,
+      "network": {
+        "requests": 551,
+        "bytes": 9582783,
+        "byHost": {
+          "127.0.0.1:5285": 5107900,
+          "cyberjapandata.gsi.go.jp": 3347206,
+          "tile.plateauview.mlit.go.jp": 815515,
+          "cyberjapandata2.gsi.go.jp": 801,
+          "assets.cms.plateau.reearth.io": 311361
+        },
+        "readyRequests": 135,
+        "readyBytes": 8595752,
+        "afterInteractRequests": 551,
+        "afterInteractBytes": 9582783
+      },
+      "heapMB": 54.1,
+      "interact": {
+        "frames": 299,
+        "avgMs": 16.63913043481251,
+        "p50Ms": 16.69999998807907,
+        "p95Ms": 18.100000008940697,
+        "maxMs": 22.099999994039536,
+        "fpsAvg": 60.09929448643498,
+        "renderAvgMs": 0.9866220735785953,
+        "renderP95Ms": 2.2000000029802322,
+        "renderMaxMs": 6.899999991059303,
+        "heapMB": 62.85729694366455,
+        "resolutionScale": 0.6,
+        "globeSSE": 4,
+        "quality": "lite",
+        "tilesets": {
+          "loaded": 3,
+          "loading": 0
+        },
+        "water": 16
+      },
+      "errors": [],
+      "longTasksUntilReady": {
+        "count": 1,
+        "totalMs": 125,
+        "maxMs": 125
+      }
+    }
+  ]
+}
