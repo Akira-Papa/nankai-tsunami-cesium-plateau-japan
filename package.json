@@ -1,0 +1,28 @@
+{
+  "name": "nagoya-tsunami-3d-cesium-plateau",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "description": "名古屋市 津波浸水3Dビジュアライザ（CesiumJS + PLATEAU配信）",
+  "engines": {
+    "node": ">=20.19.0"
+  },
+  "scripts": {
+    "dev": "vite",
+    "typecheck": "tsc --noEmit",
+    "build": "npm run typecheck && vite build",
+    "preview": "vite preview",
+    "test": "vitest run",
+    "check:tilesets": "node scripts/check-tilesets.mjs"
+  },
+  "dependencies": {
+    "cesium": "1.145.0",
+    "japan-geoid": "^0.4.2"
+  },
+  "devDependencies": {
+    "typescript": "5.9.3",
+    "vite": "6.4.3",
+    "vite-plugin-cesium": "1.2.23",
+    "vitest": "^4.1.11"
+  }
+}

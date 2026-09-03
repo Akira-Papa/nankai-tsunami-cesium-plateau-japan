@@ -1,0 +1,221 @@
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8" />
+    <!-- maximum-scale=1: 地図のピンチ操作とブラウザズームの競合を避けるため（アクセシビリティ上の注意点は README 参照） -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, viewport-fit=cover" />
+    <meta name="theme-color" content="#0b1f2a" />
+    <meta name="color-scheme" content="dark" />
+    <meta name="description" content="南海トラフ巨大地震の津波高（内閣府 2025／2012 公表値）を、全国の沿岸市区町村の実地形（PLATEAU-Terrain）と建物（PLATEAU 3D Tiles）の上に水面として重ねて浸水範囲を直感的に見る試作アプリ。簡易可視化であり公式想定ではありません。" />
+    <meta name="format-detection" content="telephone=no" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="南海トラフ津波3D" />
+    <meta name="referrer" content="strict-origin-when-cross-origin" />
+
+    <!-- 外部配信元への事前接続（地理院タイル／PLATEAU-Terrain／PLATEAU 3D Tiles／重ねるハザードマップ） -->
+    <link rel="preconnect" href="https://cyberjapandata.gsi.go.jp" crossorigin />
+    <link rel="preconnect" href="https://tile.plateauview.mlit.go.jp" crossorigin />
+    <link rel="preconnect" href="https://assets.cms.plateau.reearth.io" crossorigin />
+    <link rel="preconnect" href="https://disaportaldata.gsi.go.jp" crossorigin />
+    <link rel="dns-prefetch" href="https://cyberjapandata.gsi.go.jp" />
+    <link rel="dns-prefetch" href="https://tile.plateauview.mlit.go.jp" />
+    <link rel="dns-prefetch" href="https://assets.cms.plateau.reearth.io" />
+    <link rel="dns-prefetch" href="https://disaportaldata.gsi.go.jp" />
+
+    <!-- PWA（インストール可能なホーム画面アプリ。Service Worker は意図的に未導入：README 参照） -->
+    <link rel="manifest" href="manifest.webmanifest" />
+    <link rel="icon" type="image/png" sizes="64x64" href="icons/favicon-64.png" />
+    <link rel="apple-touch-icon" sizes="180x180" href="icons/apple-touch-icon.png" />
+
+    <title>南海トラフ 津波浸水3Dビジュアライザ 全国版（試作）</title>
+
+    <style>
+      /* index.html 固有の最小スタイル（noscript／WebGL 非対応時の案内）。UI 本体のスタイルは src/style.css */
+      .fallback {
+        position: fixed; inset: 0; z-index: 100; display: flex; align-items: center; justify-content: center;
+        padding: 24px; background: #0b1f2a; color: #eaf2f6; text-align: center; line-height: 1.6;
+        font-family: -apple-system, BlinkMacSystemFont, "Hiragino Sans", "Hiragino Kaku Gothic ProN", "Noto Sans JP", "Segoe UI", sans-serif;
+      }
+      .fallback[hidden] { display: none; }
+      .fallback > div { max-width: 520px; }
+      .fallback h2 { margin: 0 0 8px; font-size: 18px; }
+      .fallback p { margin: 6px 0; font-size: 14px; }
+      .fallback a { color: #ffb454; }
+      .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0; }
+    </style>
+  </head>
+  <body>
+    <noscript>
+      <div class="fallback" role="alert">
+        <div>
+          <h2>JavaScript が無効です</h2>
+          <p>この3D可視化アプリの動作には JavaScript が必要です。ブラウザの設定で JavaScript を有効にしてから再読み込みしてください。</p>
+          <p>避難判断は各自治体のハザードマップ（<a href="https://disaportal.gsi.go.jp/">ハザードマップポータルサイト</a>）を参照してください。</p>
+        </div>
+      </div>
+    </noscript>
+
+    <!-- WebGL 非対応（または無効）時の案内。head 内スクリプトではなく、この直後の判定スクリプトで表示を切り替える -->
+    <div id="webglFallback" class="fallback" role="alert" hidden>
+      <div>
+        <h2>お使いの環境では 3D 表示（WebGL）が利用できません</h2>
+        <p>このアプリは WebGL を使って地形・建物・水面を描画します。ブラウザのハードウェアアクセラレーションを有効にするか、最新の Safari／Chrome／Edge／Firefox でお試しください。</p>
+        <p id="webglFallbackDetail" class="muted"></p>
+        <p>避難判断は各自治体のハザードマップ（<a href="https://disaportal.gsi.go.jp/" target="_blank" rel="noopener">ハザードマップポータルサイト</a>）を参照してください。</p>
+      </div>
+    </div>
+    <script>
+      // WebGL 対応判定（モジュール本体より先に同期実行）。非対応なら案内を表示し、UI パネルは隠す。
+      (function () {
+        var ok = false, detail = '';
+        try {
+          var c = document.createElement('canvas');
+          var gl = c.getContext('webgl2') || c.getContext('webgl') || c.getContext('experimental-webgl');
+          ok = !!gl;
+          if (!ok) detail = 'WebGL コンテキストを作成できませんでした。';
+        } catch (e) {
+          detail = String(e && e.message ? e.message : e);
+        }
+        if (!ok) {
+          var fb = document.getElementById('webglFallback');
+          var d = document.getElementById('webglFallbackDetail');
+          if (d) d.textContent = detail;
+          if (fb) fb.hidden = false;
+          document.documentElement.setAttribute('data-webgl', 'unsupported');
+        }
+        // Cesium 初期化時の実行時エラー（GPU ブラックリスト等）も同じ案内に集約する
+        window.addEventListener('error', function (ev) {
+          var msg = ev && ev.message ? String(ev.message) : '';
+          var src = ev && ev.filename ? String(ev.filename) : '';
+          // ブラウザ拡張機能由来のエラーは本アプリの問題ではないため無視
+          if (/^(chrome|moz|safari)-extension:/.test(src) || /Receiving end does not exist|Extension context invalidated/i.test(msg)) return;
+          if (/WebGL|webgl|RuntimeError|context/i.test(msg) && !/Script error/i.test(msg)) {
+            var fb2 = document.getElementById('webglFallback');
+            var d2 = document.getElementById('webglFallbackDetail');
+            if (fb2 && fb2.hidden) { if (d2) d2.textContent = msg; fb2.hidden = false; }
+          }
+        });
+      })();
+    </script>
+
+    <div id="cesiumContainer" role="application" aria-label="3D地図（津波浸水の可視化）"></div>
+
+    <!-- 通知バナー（ui.setBanner）。タップで閉じる -->
+    <div id="banner" class="banner" role="status" aria-live="polite" hidden></div>
+
+    <!-- タップ地点の浸水深リードアウト（ui.setReadout）。初回計測までは案内文を表示 -->
+    <div id="readoutHint" class="readout-hint" aria-hidden="true">地図をタップ → その地点の浸水深を表示</div>
+    <div id="readout" class="readout" role="status" aria-live="polite" title="タップで閉じる" hidden></div>
+
+    <button id="panelToggle" class="panel-toggle" type="button" aria-expanded="true" aria-controls="panel">▼ パネルを閉じる</button>
+
+    <aside id="panel" class="panel" aria-labelledby="appTitle">
+      <header class="panel-head">
+        <h1 id="appTitle">南海トラフ 津波浸水3D<span class="tag">全国版・試作</span></h1>
+        <p class="sub">CesiumJS + PLATEAU配信（地形・建物）＋ 内閣府 津波高（2025／2012）</p>
+      </header>
+
+      <!-- 1. 地域選択 -->
+      <section class="sec" aria-labelledby="regionTitle">
+        <div id="regionTitle" class="sec-title">地域を選ぶ</div>
+        <div class="field">
+          <label for="prefSelect">都道府県</label>
+          <select id="prefSelect" class="select" aria-label="都道府県"><option value="">読み込み中…</option></select>
+        </div>
+        <div class="field">
+          <label for="muniSearch">検索</label>
+          <input id="muniSearch" class="input" type="search" inputmode="search" autocomplete="off" enterkeyhint="search" placeholder="例: 高知、黒潮、名古屋" aria-describedby="muniCount" />
+        </div>
+        <div class="field">
+          <label for="muniSelect">市区町村</label>
+          <select id="muniSelect" class="select" aria-label="市区町村"><option value="">読み込み中…</option></select>
+          <span id="muniCount" class="muted count" aria-live="polite"></span>
+        </div>
+        <button id="flyTo" type="button" class="btn btn-wide" disabled>この市町村へ移動</button>
+        <p class="note">対象は南海トラフの内閣府一覧表に掲載のある市町村と、海岸線を持つ市区町村です。政令市は市単位で扱います。</p>
+      </section>
+
+      <!-- 2. 内閣府 津波高（選択中の市区町村） -->
+      <section class="sec" aria-labelledby="tsTitle">
+        <div id="tsTitle" class="sec-title">内閣府 津波高（海岸での最大値）</div>
+        <div id="tsMuniName" class="ts-name">市区町村を選択してください</div>
+        <table id="tsunamiTable" class="ts-table">
+          <caption class="sr-only">選択中の市区町村の津波高</caption>
+          <tbody>
+            <tr><th scope="row">2025 最大</th><td id="tsMax2025">—</td></tr>
+            <tr><th scope="row">2025 平均</th><td id="tsMean2025">—</td></tr>
+            <tr><th scope="row">2012 最大</th><td id="tsMax2012">—</td></tr>
+            <tr><th scope="row">浸水面積（2025）</th><td id="tsArea">—</td></tr>
+          </tbody>
+        </table>
+        <p id="tsUnit" class="note">単位: m（T.P.基準）</p>
+        <p id="tsNote" class="note ts-note" hidden></p>
+      </section>
+
+      <!-- 3. 津波高の指定（プリセット＋スライダー） -->
+      <section class="sec" aria-labelledby="heightTitle">
+        <div class="row-between">
+          <label id="heightTitle" for="heightSlider">津波の高さ（T.P.基準）</label>
+          <output id="heightReadout" for="heightSlider" aria-live="polite">5.0 m</output>
+        </div>
+        <div id="presets" class="presets" role="group" aria-label="津波高プリセット"></div>
+        <input id="heightSlider" type="range" min="0" max="35" step="0.1" value="5.0" aria-describedby="heightScale" aria-label="津波の高さ（メートル）" />
+        <div id="heightScale" class="scale" aria-hidden="true"><span>0</span><span>5</span><span>10</span><span>15</span><span>20</span><span>25</span><span>30</span><span>35 m</span></div>
+        <p class="note">※ 内閣府の津波高は海岸線での最大値です。内陸へ一律に適用すると過大・過小になります。スライダーを動かすと「手動」になります。</p>
+      </section>
+
+      <!-- 4. 表示設定 -->
+      <section class="sec" aria-labelledby="layersTitle">
+        <div id="layersTitle" class="sec-title">重ねる情報</div>
+        <label class="chk"><input id="officialToggle" type="checkbox" /> 公式浸水想定を重ねる（重ねるハザードマップ）</label>
+        <div id="legend" class="legend" aria-label="津波浸水想定の凡例（浸水深）" hidden>
+          <div class="legend-title">津波浸水想定（浸水深）<span class="legend-src">出典: ハザードマップポータルサイト</span></div>
+          <ul class="legend-list">
+            <li><i style="background:#FFFFB3"></i>0.3 m 未満</li>
+            <li><i style="background:#F7F5A9"></i>0.3〜0.5 m</li>
+            <li><i style="background:#F8E1A6"></i>0.5〜1 m</li>
+            <li><i style="background:#FFD8C0"></i>1〜3 m</li>
+            <li><i style="background:#FFB7B7"></i>3〜5 m</li>
+            <li><i style="background:#FF9191"></i>5〜10 m</li>
+            <li><i style="background:#F285C9"></i>10〜20 m</li>
+            <li><i style="background:#A020F0"></i>20 m 以上</li>
+          </ul>
+        </div>
+        <div class="grid2">
+          <div role="group" aria-labelledby="bldgTitle">
+            <div id="bldgTitle" class="sec-title">建物モデル</div>
+            <label class="chk"><input id="bldgToggle" type="checkbox" checked /> 建物を表示</label>
+            <label class="chk"><input id="lod2Toggle" type="checkbox" /> LOD2（対応都市のみ・重い）</label>
+          </div>
+          <div role="group" aria-labelledby="imageryTitle">
+            <div id="imageryTitle" class="sec-title">地図タイル</div>
+            <div role="radiogroup" aria-labelledby="imageryTitle">
+              <label class="chk"><input id="imageryPale" type="radio" name="imagery" value="pale" checked /> 淡色地図</label>
+              <label class="chk"><input id="imageryPhoto" type="radio" name="imagery" value="photo" /> 航空写真</label>
+            </div>
+            <label class="chk"><input id="waterToggle" type="checkbox" checked /> 水面を表示</label>
+          </div>
+        </div>
+      </section>
+
+      <!-- 5. 視点・状態 -->
+      <section class="sec">
+        <div class="row-between">
+          <button id="resetView" type="button" class="btn">視点リセット</button>
+          <span id="status" class="muted mono status" role="status" aria-live="polite"></span>
+        </div>
+      </section>
+
+      <!-- 6. 免責（常時表示）・出典 -->
+      <footer id="disclaimer" class="disclaimer" role="note">
+        <strong>免責</strong>：簡易可視化であり公式想定ではありません。内閣府の津波高は海岸線での最大値で、内陸へ一律に適用すると過大・過小になります。避難判断は各自治体のハザードマップを参照してください。
+        （<a href="https://disaportal.gsi.go.jp/" target="_blank" rel="noopener">ハザードマップポータルサイト</a>）
+        <div id="attribution" class="credits">出典: 地理院タイル／PLATEAU（国土交通省）／ハザードマップポータルサイト／内閣府 南海トラフ巨大地震モデル検討会／japan-geoid GSIGEO2011（承認番号 R 5JHs 560）</div>
+      </footer>
+    </aside>
+
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>

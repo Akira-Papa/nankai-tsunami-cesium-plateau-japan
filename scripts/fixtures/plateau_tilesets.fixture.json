@@ -1,0 +1,310 @@
+{
+  "generated": "2026-09-02",
+  "source": "https://api.plateauview.mlit.go.jp/datacatalog/plateau-datasets (6-city fixture; bbox = root.boundingVolume.region in degrees)",
+  "tilesets": [
+    {
+      "city_code": "23100",
+      "city": "名古屋市",
+      "pref_code": "23",
+      "pref": "愛知県",
+      "ward_code": "23109",
+      "ward": "熱田区",
+      "lod": 1,
+      "texture": true,
+      "year": 2022,
+      "url": "https://assets.cms.plateau.reearth.io/assets/48/98bbde-44d2-483f-9191-6653e5744ad3/23100_nagoya-shi_city_2022_citygml_4_op_bldg_3dtiles_23109_atsuta-ku_lod1/tileset.json",
+      "bbox": [
+        136.8826,
+        35.1121,
+        136.9173,
+        35.144
+      ],
+      "http_status": 200
+    },
+    {
+      "city_code": "23100",
+      "city": "名古屋市",
+      "pref_code": "23",
+      "pref": "愛知県",
+      "ward_code": "23110",
+      "ward": "中川区",
+      "lod": 1,
+      "texture": true,
+      "year": 2022,
+      "url": "https://assets.cms.plateau.reearth.io/assets/a9/1dc07d-d6b2-470a-8431-6a73334ce00a/23100_nagoya-shi_city_2022_citygml_4_op_bldg_3dtiles_23110_nakagawa-ku_lod1/tileset.json",
+      "bbox": [
+        136.7972,
+        35.1114,
+        136.898,
+        35.1687
+      ],
+      "http_status": 200
+    },
+    {
+      "city_code": "23100",
+      "city": "名古屋市",
+      "pref_code": "23",
+      "pref": "愛知県",
+      "ward_code": "23110",
+      "ward": "中川区",
+      "lod": 2,
+      "texture": false,
+      "year": 2022,
+      "url": "https://assets.cms.plateau.reearth.io/assets/52/c5d139-a803-4bd5-84cc-4cc3be4e7069/23100_nagoya-shi_city_2022_citygml_4_op_bldg_3dtiles_23110_nakagawa-ku_lod2_no_texture/tileset.json",
+      "bbox": [
+        136.7972,
+        35.1114,
+        136.898,
+        35.1687
+      ],
+      "http_status": 200
+    },
+    {
+      "city_code": "23100",
+      "city": "名古屋市",
+      "pref_code": "23",
+      "pref": "愛知県",
+      "ward_code": "23111",
+      "ward": "港区",
+      "lod": 1,
+      "texture": true,
+      "year": 2022,
+      "url": "https://assets.cms.plateau.reearth.io/assets/79/d67234-5b9d-4515-a16b-55edfe7d3bd3/23100_nagoya-shi_city_2022_citygml_4_op_bldg_3dtiles_23111_minato-ku_lod1/tileset.json",
+      "bbox": [
+        136.7917,
+        35.0348,
+        136.9112,
+        35.1267
+      ],
+      "http_status": 200
+    },
+    {
+      "city_code": "23100",
+      "city": "名古屋市",
+      "pref_code": "23",
+      "pref": "愛知県",
+      "ward_code": "23111",
+      "ward": "港区",
+      "lod": 2,
+      "texture": false,
+      "year": 2022,
+      "url": "https://assets.cms.plateau.reearth.io/assets/14/985308-f6cd-4fbb-b71e-ba61c9501556/23100_nagoya-shi_city_2022_citygml_4_op_bldg_3dtiles_23111_minato-ku_lod2_no_texture/tileset.json",
+      "bbox": [
+        136.7917,
+        35.0348,
+        136.9112,
+        35.1267
+      ],
+      "http_status": 200
+    },
+    {
+      "city_code": "23100",
+      "city": "名古屋市",
+      "pref_code": "23",
+      "pref": "愛知県",
+      "ward_code": "23112",
+      "ward": "南区",
+      "lod": 1,
+      "texture": true,
+      "year": 2022,
+      "url": "https://assets.cms.plateau.reearth.io/assets/52/c3206f-5462-4b84-ad50-a34ccf9303f4/23100_nagoya-shi_city_2022_citygml_4_op_bldg_3dtiles_23112_minami-ku_lod1/tileset.json",
+      "bbox": [
+        136.9006,
+        35.0693,
+        136.9492,
+        35.1178
+      ],
+      "http_status": 200
+    },
+    {
+      "city_code": "39201",
+      "city": "高知市",
+      "pref_code": "39",
+      "pref": "高知県",
+      "ward_code": null,
+      "ward": null,
+      "lod": 1,
+      "texture": true,
+      "year": 2023,
+      "url": "https://assets.cms.plateau.reearth.io/assets/44/c74c8d-90b5-4668-af36-60fd131a4b91/39201_kouchi-shi_pref_2023_citygml_2_op_bldg_3dtiles_lod1/tileset.json",
+      "bbox": [
+        133.4806,
+        33.5338,
+        133.5687,
+        33.5822
+      ],
+      "http_status": 200
+    },
+    {
+      "city_code": "39201",
+      "city": "高知市",
+      "pref_code": "39",
+      "pref": "高知県",
+      "ward_code": null,
+      "ward": null,
+      "lod": 2,
+      "texture": false,
+      "year": 2023,
+      "url": "https://assets.cms.plateau.reearth.io/assets/e3/cfc53c-b62b-4a80-a8ae-c616b2a4f354/39201_kouchi-shi_pref_2023_citygml_2_op_bldg_3dtiles_lod2_no_texture/tileset.json",
+      "bbox": [
+        133.4806,
+        33.5338,
+        133.5687,
+        33.5822
+      ],
+      "http_status": 200
+    },
+    {
+      "city_code": "22100",
+      "city": "静岡市",
+      "pref_code": "22",
+      "pref": "静岡県",
+      "ward_code": "22102",
+      "ward": "駿河区",
+      "lod": 1,
+      "texture": true,
+      "year": 2023,
+      "url": "https://assets.cms.plateau.reearth.io/assets/18/aba17e-da3b-441d-9712-a6db88f3e6c5/22100_shizuoka-shi_city_2023_citygml_3_op_bldg_3dtiles_22102_suruga-ku_lod1/tileset.json",
+      "bbox": [
+        138.2943,
+        34.9009,
+        138.4738,
+        35.0062
+      ],
+      "http_status": 200
+    },
+    {
+      "city_code": "22100",
+      "city": "静岡市",
+      "pref_code": "22",
+      "pref": "静岡県",
+      "ward_code": "22103",
+      "ward": "清水区",
+      "lod": 1,
+      "texture": true,
+      "year": 2023,
+      "url": "https://assets.cms.plateau.reearth.io/assets/db/4e7d98-7baf-4fae-bf13-3c98fd53cf32/22100_shizuoka-shi_city_2023_citygml_3_op_bldg_3dtiles_22103_shimizu-ku_lod1/tileset.json",
+      "bbox": [
+        138.4108,
+        34.9626,
+        138.6301,
+        35.1942
+      ],
+      "http_status": 200
+    },
+    {
+      "city_code": "22100",
+      "city": "静岡市",
+      "pref_code": "22",
+      "pref": "静岡県",
+      "ward_code": "22103",
+      "ward": "清水区",
+      "lod": 2,
+      "texture": false,
+      "year": 2023,
+      "url": "https://assets.cms.plateau.reearth.io/assets/ee/499c8c-3104-40c2-a5a3-ee09f3fc20ff/22100_shizuoka-shi_city_2023_citygml_3_op_bldg_3dtiles_22103_shimizu-ku_lod2_no_texture/tileset.json",
+      "bbox": [
+        138.4108,
+        34.9626,
+        138.6301,
+        35.1942
+      ],
+      "http_status": 200
+    },
+    {
+      "city_code": "47201",
+      "city": "那覇市",
+      "pref_code": "47",
+      "pref": "沖縄県",
+      "ward_code": null,
+      "ward": null,
+      "lod": 1,
+      "texture": true,
+      "year": 2020,
+      "url": "https://assets.cms.plateau.reearth.io/assets/47/475c4c-bc8a-46aa-a443-332d4be8d1bb/47201_naha-shi_city_2020_citygml_7_op_bldg_3dtiles_lod1/tileset.json",
+      "bbox": [
+        127.64,
+        26.1765,
+        127.7388,
+        26.2472
+      ],
+      "http_status": 200
+    },
+    {
+      "city_code": "47201",
+      "city": "那覇市",
+      "pref_code": "47",
+      "pref": "沖縄県",
+      "ward_code": null,
+      "ward": null,
+      "lod": 2,
+      "texture": false,
+      "year": 2020,
+      "url": "https://assets.cms.plateau.reearth.io/assets/c7/efa2db-6f03-4eea-bb3c-d42b3a2c7af3/47201_naha-shi_city_2020_citygml_7_op_bldg_3dtiles_lod2_no_texture/tileset.json",
+      "bbox": [
+        127.64,
+        26.1765,
+        127.7388,
+        26.2472
+      ],
+      "http_status": 200
+    },
+    {
+      "city_code": "30201",
+      "city": "和歌山市",
+      "pref_code": "30",
+      "pref": "和歌山県",
+      "ward_code": null,
+      "ward": null,
+      "lod": 1,
+      "texture": true,
+      "year": 2023,
+      "url": "https://assets.cms.plateau.reearth.io/assets/1f/07f986-904d-42b3-8f67-2a0c70214a56/30201_wakayama-shi_city_2023_citygml_2_op_bldg_3dtiles_lod1/tileset.json",
+      "bbox": [
+        135.0014,
+        34.1509,
+        135.3134,
+        34.3117
+      ],
+      "http_status": 200
+    },
+    {
+      "city_code": "36201",
+      "city": "徳島市",
+      "pref_code": "36",
+      "pref": "徳島県",
+      "ward_code": null,
+      "ward": null,
+      "lod": 1,
+      "texture": true,
+      "year": 2023,
+      "url": "https://assets.cms.plateau.reearth.io/assets/7e/9aa38f-6b41-4e56-bd52-1ba727fd81f6/36201_tokushima-shi_city_2023_citygml_2_op_bldg_3dtiles_lod1/tileset.json",
+      "bbox": [
+        134.4243,
+        33.9555,
+        134.605,
+        34.1293
+      ],
+      "http_status": 200
+    },
+    {
+      "city_code": "36201",
+      "city": "徳島市",
+      "pref_code": "36",
+      "pref": "徳島県",
+      "ward_code": null,
+      "ward": null,
+      "lod": 2,
+      "texture": false,
+      "year": 2023,
+      "url": "https://assets.cms.plateau.reearth.io/assets/b2/8844ca-69b2-43d6-9098-9aeb561adbde/36201_tokushima-shi_city_2023_citygml_2_op_bldg_3dtiles_lod2_no_texture/tileset.json",
+      "bbox": [
+        134.4243,
+        33.9555,
+        134.605,
+        34.1293
+      ],
+      "http_status": 200
+    }
+  ]
+}
