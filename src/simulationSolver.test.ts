@@ -19,7 +19,7 @@ describe('experimental shallow-water solver: physical invariants', () => {
     expect(r.maxDepth[10*21+10]).toBe(0);
   });
   it('maintains nonnegative finite depths and bilateral symmetry of a centered wave', () => {
-    const r = runSimulation(terrain(), { ...config, heightM: 30, durationMinutes: 5 });
+    const r = runSimulation(terrain(), { ...config, heightM: 50, durationMinutes: 5 });
     expect([...r.maxDepth, ...r.maxSurface].every(v => Number.isFinite(v) && v >= 0)).toBe(true);
     for (let y = 0; y < 41; y++) for (let x = 0; x < 41; x++) {
       expect(r.maxSurface[y*41+x]).toBeCloseTo(r.maxSurface[y*41+40-x], 5);
@@ -41,6 +41,22 @@ describe('experimental shallow-water solver: physical invariants', () => {
     const r = runSimulation(grid, { ...config, lon: 0.2, radiusKm: 1, durationMinutes: 5 });
     expect(r.maxDepth[20*41+20]).toBe(0);
     expect(r.maxSurface[20*41+30]).toBeLessThan(1e-8);
+  });
+  it('does not initialize a tsunami across a land wall in another sea basin', () => {
+    const grid = terrain(41, x => x === 20 ? 100 : -100);
+    const r = runSimulation(grid, {...config,lon:.45,heightM:50,radiusKm:20,durationMinutes:1/60});
+    expect(r.maxSurface[20*41+22]).toBeLessThan(1e-8);
+    expect(r.maxSurface[20*41+18]).toBeCloseTo(50, 4);
+  });
+  it('does not shortcut a peninsula when the water path exceeds the source radius', () => {
+    const grid = terrain(41, (x,y) => x === 20 && y < 36 ? 100 : -100);
+    const r = runSimulation(grid, {...config,lon:.45,heightM:50,radiusKm:10,durationMinutes:1/60});
+    expect(r.ocean[20*41+22]).toBe(1);
+    expect(r.maxSurface[20*41+22]).toBeLessThan(1e-8);
+  });
+  it('accepts 50m and rejects values above the configured limit', () => {
+    expect(runSimulation(terrain(), {...config,heightM:50}).elapsedSec).toBe(60);
+    expect(()=>runSimulation(terrain(), {...config,heightM:50.1})).toThrow(/範囲外/);
   });
   it('rejects land, outside-domain and nonfinite inputs', () => {
     expect(() => runSimulation(terrain(21, () => 1), config)).toThrow(/海域/);

@@ -35,6 +35,8 @@ describe('dynamic simulation map semantics', () => {
     expect(simulationColor(0.1, true)).toBe(OCEAN_COLORS[1]);
     expect(simulationColor(1, true)).toBe(OCEAN_COLORS[3]);
     expect(simulationColor(10, false)).toBe(LAND_COLORS[5]);
+    expect(simulationColor(30, false)).toBe(LAND_COLORS[7]);
+    expect(simulationColor(50, true)).toBe(OCEAN_COLORS[8]);
     expect(simulationColor(0.3, false)).toBe(LAND_COLORS[2]);
   });
   it('flips south-first rows so north is at the top and uses ocean mask', () => {

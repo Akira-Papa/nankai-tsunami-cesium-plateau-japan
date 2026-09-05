@@ -28,6 +28,7 @@ export function initDynamicSimulation(viewer: Cesium.Viewer, onMode: (active: bo
     },
     onChange() { if (active) { showPin(); schedule(); } },
     onPick() { picking = true; ui.setPicking(true); },
+    onFlyToSource() { const c=ui.getConfig();viewer.camera.flyTo({destination:Cesium.Cartesian3.fromDegrees(c.lon,c.lat,650000),orientation:{heading:0,pitch:-Math.PI/2,roll:0},duration:.7}); },
     onInspect() { picking = false; ui.setPicking(false); },
     onRun() { if (active) { invalidate(); void calculate(); } },
     onCancel() { invalidate(); setStatus('計算を中止しました。再計算ボタンで実行できます。'); },

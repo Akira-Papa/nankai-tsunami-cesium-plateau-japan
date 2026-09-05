@@ -1,5 +1,7 @@
 import type { SimulationConfig, SimulationProgress, SimulationResult, TerrainGrid } from './simulationTypes';
 
+import { sourceFootprint } from './simulationSource';
+
 const G = 9.81;
 const DRY = 1e-7;
 
@@ -29,7 +31,7 @@ export function runSimulation(grid: TerrainGrid, config: SimulationConfig,
       south < -85 || south + (rows - 1) * step > 85 || !z.every(Number.isFinite))
     throw new Error('地形グリッドが不正です。');
   if (![config.lon, config.lat, config.heightM, config.radiusKm, config.durationMinutes].every(Number.isFinite) ||
-      config.heightM < 0 || config.heightM > 30 || config.radiusKm < 1 || config.radiusKm > 100 ||
+      config.heightM < 0 || config.heightM > 50 || config.radiusKm < 1 || config.radiusKm > 100 ||
       config.durationMinutes <= 0 || config.durationMinutes > 120)
     throw new Error('計算条件が範囲外です。');
   const sx = Math.round((config.lon - west) / step), sy = Math.round((config.lat - south) / step);
@@ -39,6 +41,7 @@ export function runSimulation(grid: TerrainGrid, config: SimulationConfig,
   if (!ocean[sy * w + sx]) throw new Error('波源は外海とつながる海域に指定してください。');
   // Constant metric at domain midpoint: this is a planar approximation, not spherical SWE.
   const dy = step * 111320, dx = dy * Math.cos((south + (rows - 1) * step / 2) * Math.PI / 180);
+  const footprint = sourceFootprint(grid, ocean, sy * w + sx, dx, dy, config.radiusKm * 6000);
   const h = new Float64Array(n), u = new Float64Array(n), v = new Float64Array(n);
   const dh = new Float64Array(n), du = new Float64Array(n), dv = new Float64Array(n);
   const maxSurface = new Float32Array(n), maxDepth = new Float32Array(n);
@@ -47,7 +50,7 @@ export function runSimulation(grid: TerrainGrid, config: SimulationConfig,
     if (ocean[i]) {
       const r2 = (((west + x * step - config.lon) / step * dx) ** 2 +
         ((south + y * step - config.lat) / step * dy) ** 2) / (config.radiusKm * 1000) ** 2;
-      const eta = r2 <= 36 ? config.heightM * Math.exp(-r2 / 2) : 0;
+      const eta = footprint[i] && r2 <= 36 ? config.heightM * Math.exp(-r2 / 2) : 0;
       h[i] = -z[i] + eta; maxSurface[i] = eta;
     }
   }

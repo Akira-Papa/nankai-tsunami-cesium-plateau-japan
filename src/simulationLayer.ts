@@ -1,9 +1,9 @@
 import * as Cesium from 'cesium';
 import type { SimulationResult, TerrainGrid } from './simulationTypes';
 
-export const SIMULATION_COLOR_THRESHOLDS = [0.1, 0.3, 1, 3, 10] as const;
-export const OCEAN_COLORS = ['#c6edff', '#82d3f5', '#3aafe5', '#1679cb', '#164aab', '#172b76'] as const;
-export const LAND_COLORS = ['#fff4a3', '#ffe06b', '#ffb547', '#fa7834', '#e33a25', '#a61127'] as const;
+export const SIMULATION_COLOR_THRESHOLDS = [0.1, 0.3, 1, 3, 10, 20, 30, 50] as const;
+export const OCEAN_COLORS = ['#c6edff', '#82d3f5', '#3aafe5', '#1679cb', '#164aab', '#172b76', '#11225f', '#0c1949', '#071031'] as const;
+export const LAND_COLORS = ['#fff4a3', '#ffe06b', '#ffb547', '#fa7834', '#e33a25', '#a61127', '#82103c', '#5b1459', '#351443'] as const;
 /** Values at/below 1 cm are transparent, never a statement of safety. */
 export function simulationColor(value: number, ocean: boolean): string | null {
   if (!Number.isFinite(value) || value <= 0.01) return null;

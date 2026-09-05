@@ -1,0 +1,80 @@
+{
+  "base": "http://127.0.0.1:5295",
+  "checks": [
+    {
+      "name": "noto: 50m Japan Sea source computes and renders",
+      "pass": false,
+      "error": "TimeoutError: locator.selectOption: Timeout 30000ms exceeded.\nCall log:\n\u001b[2m  - waiting for locator('#simulationSourcePreset')\u001b[22m\n\u001b[2m    - locator resolved to <select id=\"simulationSourcePreset\">…</select>\u001b[22m\n\u001b[2m  - attempting select option action\u001b[22m\n\u001b[2m    2 × waiting for element to be visible and enabled\u001b[22m\n\u001b[2m      - did not find some options\u001b[22m\n\u001b[2m    - retrying select option action\u001b[22m\n\u001b[2m    - waiting 20ms\u001b[22m\n\u001b[2m    2 × waiting for element to be visible and enabled\u001b[22m\n\u001b[2m      - did not find some options\u001b[22m\n\u001b[2m    - retrying select option action\u001b[22m\n\u001b[2m      - waiting 100ms\u001b[22m\n\u001b[2m    59 × waiting for element to be visible and enabled\u001b[22m\n\u001b[2m       - did not find some options\u001b[22m\n\u001b[2m     - retrying select option action\u001b[22m\n\u001b[2m       - waiting 500ms\u001b[22m\n"
+    },
+    {
+      "name": "niigata: 50m Japan Sea source computes and renders",
+      "pass": true,
+      "detail": {
+        "config": {
+          "lon": 138,
+          "lat": 38.5,
+          "heightM": 50,
+          "radiusKm": 50,
+          "durationMinutes": 120,
+          "domain": "regional"
+        },
+        "maxSea": 50,
+        "maxLand": 17.96183967590332,
+        "finite": true,
+        "steps": 1402,
+        "elapsed": 7200,
+        "imagery": 2
+      }
+    },
+    {
+      "name": "akita: 50m Japan Sea source computes and renders",
+      "pass": true,
+      "detail": {
+        "config": {
+          "lon": 138.5,
+          "lat": 40,
+          "heightM": 50,
+          "radiusKm": 50,
+          "durationMinutes": 120,
+          "domain": "regional"
+        },
+        "maxSea": 50,
+        "maxLand": 17.07758140563965,
+        "finite": true,
+        "steps": 1421,
+        "elapsed": 7200,
+        "imagery": 2
+      }
+    },
+    {
+      "name": "hokkaido: 50m Japan Sea source computes and renders",
+      "pass": true,
+      "detail": {
+        "config": {
+          "lon": 139,
+          "lat": 43.5,
+          "heightM": 50,
+          "radiusKm": 50,
+          "durationMinutes": 120,
+          "domain": "regional"
+        },
+        "maxSea": 50,
+        "maxLand": 13.698301315307617,
+        "finite": true,
+        "steps": 1463,
+        "elapsed": 7200,
+        "imagery": 2
+      }
+    },
+    {
+      "name": "lower height changes calculation and 50m can be restored",
+      "pass": true,
+      "detail": {
+        "before": 50,
+        "after": 10,
+        "restored": 50
+      }
+    }
+  ],
+  "errors": []
+}

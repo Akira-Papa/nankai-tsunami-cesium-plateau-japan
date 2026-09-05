@@ -9,13 +9,13 @@
   <link rel="manifest" href="/manifest.webmanifest" />
   <link rel="icon" href="/icons/favicon-64.png" />
   <link rel="preconnect" href="https://cyberjapandata.gsi.go.jp" crossorigin />
-  <title>南海トラフ 津波3Dマップ｜全国の街と浸水を知る</title>
+  <title>日本全国 津波3Dマップ｜全国の街と浸水を知る</title>
 </head>
 <body>
   <a href="#muniSearch" class="skip-link">地図の操作パネルへ</a>
   <header class="app-header">
     <div class="brand-mark" aria-hidden="true">≋</div>
-    <div class="brand"><p class="eyebrow">JAPAN TSUNAMI EXPLORER</p><h1>南海トラフ <span>津波3Dマップ</span></h1></div>
+    <div class="brand"><p class="eyebrow">JAPAN TSUNAMI EXPLORER</p><h1>日本全国 <span>津波3Dマップ</span></h1></div>
     <span class="purpose-label">想定を知る、備えにつなげる</span>
     <button id="shareButton" class="header-button" type="button">この視点を共有 ↗</button>
   </header>
@@ -53,7 +53,7 @@
     </section>
     <section class="panel-section" aria-labelledby="pointTitle"><h3 id="pointTitle"><span>03</span> 地点を調べる</h3><div id="pointReadout" class="point-readout" role="status" aria-live="polite">地図上の気になる場所をクリックしてください。<small>収録セルがない場所は「安全」を意味しません。</small></div></section>
     <section class="panel-section display-settings" aria-labelledby="displayTitle"><h3 id="displayTitle">地図の表示</h3><label class="toggle-row"><span>3D建物 <small>対応地域のみ</small></span><input id="buildingsToggle" type="checkbox" checked /></label><label class="toggle-row"><span>航空写真</span><input id="photoToggle" type="checkbox" /></label><label class="toggle-row"><span>軽量表示 <small>動作が重いとき</small></span><input id="liteToggle" type="checkbox" /></label><p class="note">建物の見た目の細かさと、浸水計算の解像度は異なります。</p></section>
-    <footer class="panel-footer"><details><summary>データの出典と、この地図の使い方</summary><p>計算済みの公式想定と、任意の波源・津波高を指定する実験計算を切り替えられます。実験計算は数kmメッシュの浅水モデルで、実災害の精密予測ではありません。</p><p>表示は内閣府2025の浸水メッシュを独自集約したものです。色付きセル全体が浸水するという意味ではありません。提供範囲・計算条件は選択データの説明を確認してください。</p><p><a href="https://www.bousai.go.jp/jishin/nankai/kento_wg/index.html" target="_blank" rel="noopener noreferrer">内閣府 南海トラフ地震の想定 ↗</a><br /><a href="https://disaportal.gsi.go.jp/" target="_blank" rel="noopener noreferrer">自治体のハザードマップを調べる ↗</a></p><p>地図：地理院タイル ／ 地形・建物：PLATEAU</p><p>移動：ドラッグ ／ 拡大：ホイール・ピンチ ／ 傾き：Ctrl＋ドラッグ・2本指操作</p></details></footer>
+    <footer class="panel-footer"><details><summary>データの出典と、この地図の使い方</summary><p>計算済みの公式想定と、任意の波源・津波高を指定する実験計算を切り替えられます。実験計算は数kmメッシュの浅水モデルで、実災害の精密予測ではありません。</p><p>公式の計算済み表示は内閣府2025の浸水メッシュを独自集約したものです。色付きセル全体が浸水するという意味ではありません。提供範囲・計算条件は選択データの説明を確認してください。</p><p><a href="https://www.bousai.go.jp/jishin/nankai/kento_wg/index.html" target="_blank" rel="noopener noreferrer">内閣府 南海トラフ地震の想定 ↗</a><br /><a href="https://disaportal.gsi.go.jp/" target="_blank" rel="noopener noreferrer">自治体のハザードマップを調べる ↗</a></p><p>地図：地理院タイル ／ 地形・建物：PLATEAU</p><p>移動：ドラッグ ／ 拡大：ホイール・ピンチ ／ 傾き：Ctrl＋ドラッグ・2本指操作</p></details></footer>
   </aside>
   <div id="webglFallback" class="fallback" role="alert" hidden><div><h2>3D地図を表示できませんでした</h2><p id="webglFallbackDetail">WebGL対応のブラウザでお試しください。</p><a href="https://disaportal.gsi.go.jp/">ハザードマップポータルへ</a></div></div>
   <noscript><div class="fallback"><div><h2>JavaScriptを有効にしてください</h2><p>3D地図の操作にJavaScriptを使用します。</p><a href="https://disaportal.gsi.go.jp/">ハザードマップポータルへ</a></div></div></noscript>

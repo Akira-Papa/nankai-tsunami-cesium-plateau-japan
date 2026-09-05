@@ -7,6 +7,7 @@ export interface SimulationUiCallbacks {
   onChange(config: SimulationConfig): void;
   onPick(): void;
   onInspect(): void;
+  onFlyToSource?(): void;
   onRun(): void;
   onCancel(): void;
 }
@@ -27,12 +28,15 @@ export function initSimulationUi(container: HTMLElement, callbacks: SimulationUi
       <div class="simulation-field">
         <label for="simulationHeight">波源の津波高（初期水面上昇）</label>
         <output id="simulationHeightOutput" for="simulationHeight">5.0 m</output>
-        <input id="simulationHeight" type="range" min="0.1" max="30" step="0.1" value="5" aria-describedby="simulationHeightHelp">
-        <div class="simulation-range"><span>0.1 m</span><span>30 m</span></div>
+        <input id="simulationHeight" type="range" min="0.1" max="50" step="0.1" value="5" aria-describedby="simulationHeightHelp">
+        <div class="simulation-range"><span>0.1 m</span><span>50 m</span></div>
         <p id="simulationHeightHelp" class="simulation-help">沿岸到達高ではありません。波源で水面を持ち上げる高さです。</p>
       </div>
       <fieldset class="simulation-source">
         <legend>仮想波源（震源位置の代用）</legend>
+        <label for="simulationSourcePreset">海域を選ぶ</label>
+        <select id="simulationSourcePreset"><option value="custom">地図のピン・座標で指定</option><option value="noto">日本海：能登半島沖</option><option value="niigata">日本海：新潟沖</option><option value="akita">日本海：秋田沖</option><option value="hokkaido">日本海：北海道西方沖</option><option value="nankai">太平洋：四国沖</option></select>
+        <p class="simulation-help">場所の例です。公式の地震・断層モデルではありません。</p>
         <button id="simulationPick" type="button" aria-pressed="false" aria-describedby="simulationPickHelp">📍 ピンを立てる</button>
         <button id="simulationInspect" type="button" aria-pressed="false">浸水深を調べる</button>
         <p id="simulationPickHelp" class="simulation-help">ボタンを押してから、地図の海上をクリックしてください。</p>
@@ -71,11 +75,11 @@ export function initSimulationUi(container: HTMLElement, callbacks: SimulationUi
       <div class="simulation-legend" aria-label="計算結果の色の意味">
         <p><i class="simulation-ocean-key"></i>海上：海面からの最大水位上昇</p>
         <p><i class="simulation-land-key"></i>陸上：地面からの最大浸水深</p>
-        <div class="simulation-color-scale" aria-label="水位上昇と浸水深の色階級">${['0.01超','0.1–','0.3–','1–','3–','10以上'].map((label,i)=>`<div><i style="background:${OCEAN_COLORS[i]}"></i><i style="background:${LAND_COLORS[i]}"></i><span>${label}</span></div>`).join('')}</div>
+        <div class="simulation-color-scale" aria-label="水位上昇と浸水深の色階級">${['0.01超','0.1–','0.3–','1–','3–','10–','20–','30–','50以上'].map((label,i)=>`<div><i style="background:${OCEAN_COLORS[i]}"></i><i style="background:${LAND_COLORS[i]}"></i><span>${label}</span></div>`).join('')}</div>
         <p class="simulation-help">単位 m。上段は海・下段は陸。0.01 m以下は透明。計算期間の最大値を示します。</p>
       </div>
       <details class="simulation-assumptions"><summary>計算の前提と解像度</summary>
-        <p>海底・陸上の標高を使い、浅水方程式を計算します。ピンは断層の代わりに置く仮想の波源です。初期水面を釣り鐘状に上昇させ、潮位は0 mとします。断層破壊・底面摩擦・堤防・潮汐は含まず、平面近似で計算します。</p>
+        <p>海底・陸上の標高を使い、浅水方程式を計算します。ピンは断層の代わりに置く仮想の波源です。波源から海を通ってつながる範囲の初期水面を釣り鐘状に上昇させ、潮位は0 mとします。断層破壊・底面摩擦・堤防・潮汐は含まず、平面近似で計算します。</p>
         <p>数kmより小さい河川・堤防・建物・沿岸の低地は表現できません。建物単位の浸水や避難の判断には使えません。全国表示でも一部離島は計算範囲外です。地形は NOAA ETOPO1（平均海面基準）を間引いて使用しています。</p>
       </details>
     </div>`;
@@ -129,6 +133,7 @@ export function initSimulationUi(container: HTMLElement, callbacks: SimulationUi
   for (const [id, key] of [['simulationLon', 'lon'], ['simulationLat', 'lat']] as const) {
     input(id).addEventListener('input', () => {
       const field = input(id);
+      node<HTMLSelectElement>('simulationSourcePreset').value='custom';
       config[key] = field.checkValidity() ? field.valueAsNumber : NaN;
       emitChange();
     });
@@ -142,6 +147,12 @@ export function initSimulationUi(container: HTMLElement, callbacks: SimulationUi
   });
   document.getElementById('simulationMapPick')!.addEventListener('click', () => { if (!active) input('simulationModeCustom').click(); callbacks.onPick(); });
   document.getElementById('simulationMapCancel')!.addEventListener('click', () => callbacks.onCancel());
+  node<HTMLSelectElement>('simulationSourcePreset').addEventListener('change', () => {
+    const preset: Record<string, [number,number]> = {noto:[136.5,38],niigata:[138,38.5],akita:[138.5,40],hokkaido:[139,43.5],nankai:[134,32]};
+    const point = preset[node<HTMLSelectElement>('simulationSourcePreset').value]; if(!point)return;
+    config.lon=point[0];config.lat=point[1];input('simulationLon').value=String(point[0]);input('simulationLat').value=String(point[1]);
+    emitChange(); callbacks.onFlyToSource?.();
+  });
   node('simulationPick').addEventListener('click', () => callbacks.onPick());
   node('simulationInspect').addEventListener('click', () => callbacks.onInspect());
   node('simulationRun').addEventListener('click', () => {
@@ -161,6 +172,7 @@ export function initSimulationUi(container: HTMLElement, callbacks: SimulationUi
     setResult(text: string) { node('simulationResult').textContent = text; },
     setSource(lon: number, lat: number) {
       if (!Number.isFinite(lon) || !Number.isFinite(lat)) return;
+      node<HTMLSelectElement>('simulationSourcePreset').value='custom';
       config.lon = Math.round(lon * 1000) / 1000; config.lat = Math.round(lat * 1000) / 1000;
       input('simulationLon').value = String(Math.round(lon * 1000) / 1000);
       input('simulationLat').value = String(Math.round(lat * 1000) / 1000);
