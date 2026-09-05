@@ -1,6 +1,12 @@
-# 南海トラフ 津波3Dマップ
+# 南海トラフ 津波浸水3Dビジュアライザ 全国版（重量版・Cesium）
 
-日本全国をCesiumで探索し、内閣府2025の計算済みデータを加工・集約した浸水表示を確認する防災学習サイト。Viteで静的にビルドし、Vercelへ配信します。津波の物理計算をVercel上で実行する構成ではありません。
+日本全国をCesiumで探索し、内閣府2025の計算済みデータを加工・集約した浸水表示を確認する防災学習サイト。
+
+- 🌐 **公開サイト**: [https://nankai-tsunami-cesium-plateau-japan.akirafunakoshi.com](https://nankai-tsunami-cesium-plateau-japan.akirafunakoshi.com)
+- 📖 **使い方（初心者向け）**: [docs/manual/使い方マニュアル.md](docs/manual/使い方マニュアル.md)
+- 📐 **データ契約・台帳（全エージェント共通）**: [docs/precomputed/05_データ台帳.md](docs/precomputed/05_データ台帳.md)
+
+---
 
 ## 表示内容
 
