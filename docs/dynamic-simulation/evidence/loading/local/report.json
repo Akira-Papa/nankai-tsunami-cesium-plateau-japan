@@ -1,0 +1,39 @@
+{
+  "base": "http://127.0.0.1:5295",
+  "checks": [
+    {
+      "name": "map pin button opens placement and loading during terrain fetch",
+      "pass": true,
+      "detail": "計算用の海底・陸上地形を読込中…"
+    },
+    {
+      "name": "cancel while terrain pending removes loading and stale results",
+      "pass": true
+    },
+    {
+      "name": "retry completes and dismisses spinner",
+      "pass": true,
+      "detail": "計算完了：波源 134.000°E / 32.000°N ／ 30分間・277ステップ・0.10度（緯度方向 約11.1km）"
+    },
+    {
+      "name": "actual worker progress shown and mode exit cancels loading",
+      "pass": true
+    },
+    {
+      "name": "fetch error dismisses spinner and gives error",
+      "pass": true,
+      "detail": "計算できません：地形情報を取得できません (503)"
+    },
+    {
+      "name": "mobile map button and loading are visible without scrolling",
+      "pass": true,
+      "detail": {
+        "x": 15,
+        "y": 277,
+        "width": 360,
+        "height": 120.6875
+      }
+    }
+  ],
+  "errors": []
+}

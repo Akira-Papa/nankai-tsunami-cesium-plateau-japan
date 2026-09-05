@@ -1,0 +1,381 @@
+{
+  "base": "http://127.0.0.1:5295",
+  "checks": [
+    {
+      "name": "desktop click 1: source, Worker and color values change",
+      "pass": true,
+      "detail": {
+        "config": {
+          "lon": 133.961,
+          "lat": 30.993,
+          "heightM": 5,
+          "radiusKm": 50,
+          "durationMinutes": 30,
+          "domain": "national"
+        },
+        "runs": [
+          {
+            "lon": 134,
+            "lat": 32,
+            "heightM": 5,
+            "radiusKm": 50,
+            "durationMinutes": 30,
+            "domain": "national",
+            "id": 3
+          },
+          {
+            "lon": 133.961,
+            "lat": 30.993,
+            "heightM": 5,
+            "radiusKm": 50,
+            "durationMinutes": 30,
+            "domain": "national",
+            "id": 5
+          }
+        ],
+        "picking": "true",
+        "checksum": 62008149.64208023,
+        "status": "計算完了：波源 133.961°E / 30.993°N ／ 30分間・277ステップ・0.10度（緯度方向 約11.1km）",
+        "point": "再計算した結果を表示しました。海上クリックで波源を移動して再計算します。数値を見るには「浸水深を調べる」を選んでください。"
+      }
+    },
+    {
+      "name": "desktop click 2: source, Worker and color values change",
+      "pass": true,
+      "detail": {
+        "config": {
+          "lon": 135.864,
+          "lat": 30.995,
+          "heightM": 5,
+          "radiusKm": 50,
+          "durationMinutes": 30,
+          "domain": "national"
+        },
+        "runs": [
+          {
+            "lon": 134,
+            "lat": 32,
+            "heightM": 5,
+            "radiusKm": 50,
+            "durationMinutes": 30,
+            "domain": "national",
+            "id": 3
+          },
+          {
+            "lon": 133.961,
+            "lat": 30.993,
+            "heightM": 5,
+            "radiusKm": 50,
+            "durationMinutes": 30,
+            "domain": "national",
+            "id": 5
+          },
+          {
+            "lon": 135.864,
+            "lat": 30.995,
+            "heightM": 5,
+            "radiusKm": 50,
+            "durationMinutes": 30,
+            "domain": "national",
+            "id": 7
+          }
+        ],
+        "picking": "true",
+        "checksum": 66458241.5216282,
+        "status": "計算完了：波源 135.864°E / 30.995°N ／ 30分間・277ステップ・0.10度（緯度方向 約11.1km）",
+        "point": "再計算した結果を表示しました。海上クリックで波源を移動して再計算します。数値を見るには「浸水深を調べる」を選んでください。"
+      }
+    },
+    {
+      "name": "desktop click 3: source, Worker and color values change",
+      "pass": true,
+      "detail": {
+        "config": {
+          "lon": 134.568,
+          "lat": 30.997,
+          "heightM": 5,
+          "radiusKm": 50,
+          "durationMinutes": 30,
+          "domain": "national"
+        },
+        "runs": [
+          {
+            "lon": 134,
+            "lat": 32,
+            "heightM": 5,
+            "radiusKm": 50,
+            "durationMinutes": 30,
+            "domain": "national",
+            "id": 3
+          },
+          {
+            "lon": 133.961,
+            "lat": 30.993,
+            "heightM": 5,
+            "radiusKm": 50,
+            "durationMinutes": 30,
+            "domain": "national",
+            "id": 5
+          },
+          {
+            "lon": 135.864,
+            "lat": 30.995,
+            "heightM": 5,
+            "radiusKm": 50,
+            "durationMinutes": 30,
+            "domain": "national",
+            "id": 7
+          },
+          {
+            "lon": 134.568,
+            "lat": 30.997,
+            "heightM": 5,
+            "radiusKm": 50,
+            "durationMinutes": 30,
+            "domain": "national",
+            "id": 9
+          }
+        ],
+        "picking": "true",
+        "checksum": 64285397.94450337,
+        "status": "計算完了：波源 134.568°E / 30.997°N ／ 30分間・277ステップ・0.10度（緯度方向 約11.1km）",
+        "point": "再計算した結果を表示しました。海上クリックで波源を移動して再計算します。数値を見るには「浸水深を調べる」を選んでください。"
+      }
+    },
+    {
+      "name": "rapid clicks retain last source and discard old result",
+      "pass": true,
+      "detail": {
+        "config": {
+          "lon": 134.222,
+          "lat": 30.995,
+          "heightM": 5,
+          "radiusKm": 50,
+          "durationMinutes": 30,
+          "domain": "national"
+        },
+        "runs": [
+          {
+            "lon": 134,
+            "lat": 32,
+            "heightM": 5,
+            "radiusKm": 50,
+            "durationMinutes": 30,
+            "domain": "national",
+            "id": 3
+          },
+          {
+            "lon": 133.961,
+            "lat": 30.993,
+            "heightM": 5,
+            "radiusKm": 50,
+            "durationMinutes": 30,
+            "domain": "national",
+            "id": 5
+          },
+          {
+            "lon": 135.864,
+            "lat": 30.995,
+            "heightM": 5,
+            "radiusKm": 50,
+            "durationMinutes": 30,
+            "domain": "national",
+            "id": 7
+          },
+          {
+            "lon": 134.568,
+            "lat": 30.997,
+            "heightM": 5,
+            "radiusKm": 50,
+            "durationMinutes": 30,
+            "domain": "national",
+            "id": 9
+          },
+          {
+            "lon": 135.605,
+            "lat": 30.996,
+            "heightM": 5,
+            "radiusKm": 50,
+            "durationMinutes": 30,
+            "domain": "national",
+            "id": 11
+          },
+          {
+            "lon": 134.222,
+            "lat": 30.995,
+            "heightM": 5,
+            "radiusKm": 50,
+            "durationMinutes": 30,
+            "domain": "national",
+            "id": 13
+          }
+        ],
+        "picking": "true",
+        "checksum": 63111930.16012602,
+        "status": "計算完了：波源 134.222°E / 30.995°N ／ 30分間・277ステップ・0.10度（緯度方向 約11.1km）",
+        "point": "再計算した結果を表示しました。海上クリックで波源を移動して再計算します。数値を見るには「浸水深を調べる」を選んでください。"
+      }
+    },
+    {
+      "name": "inspection explicitly leaves source and calculation unchanged",
+      "pass": true,
+      "detail": {
+        "config": {
+          "lon": 134.222,
+          "lat": 30.995,
+          "heightM": 5,
+          "radiusKm": 50,
+          "durationMinutes": 30,
+          "domain": "national"
+        },
+        "runs": [
+          {
+            "lon": 134,
+            "lat": 32,
+            "heightM": 5,
+            "radiusKm": 50,
+            "durationMinutes": 30,
+            "domain": "national",
+            "id": 3
+          },
+          {
+            "lon": 133.961,
+            "lat": 30.993,
+            "heightM": 5,
+            "radiusKm": 50,
+            "durationMinutes": 30,
+            "domain": "national",
+            "id": 5
+          },
+          {
+            "lon": 135.864,
+            "lat": 30.995,
+            "heightM": 5,
+            "radiusKm": 50,
+            "durationMinutes": 30,
+            "domain": "national",
+            "id": 7
+          },
+          {
+            "lon": 134.568,
+            "lat": 30.997,
+            "heightM": 5,
+            "radiusKm": 50,
+            "durationMinutes": 30,
+            "domain": "national",
+            "id": 9
+          },
+          {
+            "lon": 135.605,
+            "lat": 30.996,
+            "heightM": 5,
+            "radiusKm": 50,
+            "durationMinutes": 30,
+            "domain": "national",
+            "id": 11
+          },
+          {
+            "lon": 134.222,
+            "lat": 30.995,
+            "heightM": 5,
+            "radiusKm": 50,
+            "durationMinutes": 30,
+            "domain": "national",
+            "id": 13
+          }
+        ],
+        "picking": "false",
+        "checksum": 63111930.16012602,
+        "status": "計算完了：波源 134.222°E / 30.995°N ／ 30分間・277ステップ・0.10度（緯度方向 約11.1km）",
+        "point": "地形標高 -4388.0 m（海面基準）／最大水位上昇（海面基準） 0.78 m。計算時間 30 分、粗いメッシュ 約 9.5 × 11.1 km。未検証の試算であり、安全や建物ごとの浸水を判定できません。"
+      }
+    },
+    {
+      "name": "mobile tap 1: repeated pin recalculates",
+      "pass": true,
+      "detail": {
+        "config": {
+          "lon": 134.378,
+          "lat": 30.996,
+          "heightM": 5,
+          "radiusKm": 50,
+          "durationMinutes": 30,
+          "domain": "national"
+        },
+        "runs": [
+          {
+            "lon": 134,
+            "lat": 32,
+            "heightM": 5,
+            "radiusKm": 50,
+            "durationMinutes": 30,
+            "domain": "national",
+            "id": 3
+          },
+          {
+            "lon": 134.378,
+            "lat": 30.996,
+            "heightM": 5,
+            "radiusKm": 50,
+            "durationMinutes": 30,
+            "domain": "national",
+            "id": 5
+          }
+        ],
+        "picking": "true",
+        "checksum": 63671841.51345627,
+        "status": "計算完了：波源 134.378°E / 30.996°N ／ 30分間・277ステップ・0.10度（緯度方向 約11.1km）",
+        "point": "再計算した結果を表示しました。海上クリックで波源を移動して再計算します。数値を見るには「浸水深を調べる」を選んでください。"
+      }
+    },
+    {
+      "name": "mobile tap 2: repeated pin recalculates",
+      "pass": true,
+      "detail": {
+        "config": {
+          "lon": 135.622,
+          "lat": 30.996,
+          "heightM": 5,
+          "radiusKm": 50,
+          "durationMinutes": 30,
+          "domain": "national"
+        },
+        "runs": [
+          {
+            "lon": 134,
+            "lat": 32,
+            "heightM": 5,
+            "radiusKm": 50,
+            "durationMinutes": 30,
+            "domain": "national",
+            "id": 3
+          },
+          {
+            "lon": 134.378,
+            "lat": 30.996,
+            "heightM": 5,
+            "radiusKm": 50,
+            "durationMinutes": 30,
+            "domain": "national",
+            "id": 5
+          },
+          {
+            "lon": 135.622,
+            "lat": 30.996,
+            "heightM": 5,
+            "radiusKm": 50,
+            "durationMinutes": 30,
+            "domain": "national",
+            "id": 7
+          }
+        ],
+        "picking": "true",
+        "checksum": 66262903.26168122,
+        "status": "計算完了：波源 135.622°E / 30.996°N ／ 30分間・277ステップ・0.10度（緯度方向 約11.1km）",
+        "point": "再計算した結果を表示しました。海上クリックで波源を移動して再計算します。数値を見るには「浸水深を調べる」を選んでください。"
+      }
+    }
+  ],
+  "errors": [],
+  "at": "2026-09-05T03:23:13.805Z"
+}

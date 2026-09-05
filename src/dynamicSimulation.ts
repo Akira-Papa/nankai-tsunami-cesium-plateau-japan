@@ -36,7 +36,7 @@ export function initDynamicSimulation(viewer: Cesium.Viewer, onMode: (active: bo
   function invalidate() {
     generation++; clearTimeout(timer); timer = undefined;
     worker?.terminate(); worker = undefined; running = false;
-    result = undefined; layer.clear(); ui.setResult(''); ui.setProgress(0);
+    result = undefined; layer.clear(); ui.setResult(''); ui.setProgress(0); ui.setBusy(false);
     if (active) readout('条件を変更したため結果は未計算です。計算完了後に地図をクリックしてください。');
   }
   function showPin() {
@@ -53,14 +53,14 @@ export function initDynamicSimulation(viewer: Cesium.Viewer, onMode: (active: bo
   }
   function schedule() {
     invalidate();
-    setStatus('条件変更を反映して再計算します…');
+    ui.setBusy(true); setStatus('条件変更を反映して再計算します…');
     timer = setTimeout(() => { void calculate(); }, 700);
   }
   async function calculate() {
     if (!active) return;
     const id = ++generation;
     const config: SimulationConfig = ui.getConfig();
-    running = true; setStatus('計算用の海底・陸上地形を読込中…');
+    running = true; ui.setBusy(true); setStatus('計算用の海底・陸上地形を読込中…');
     try {
       const terrain = await loadTerrain();
       if (id !== generation || !active) return;
@@ -81,7 +81,7 @@ export function initDynamicSimulation(viewer: Cesium.Viewer, onMode: (active: bo
           setStatus('計算結果を地図へ描画中…');
           try { await layer.setResult(completed); } catch (error) { reject(error instanceof Error ? error.message : '結果を表示できません'); return; }
           if (id !== generation || !active) return;
-          result = completed; running = false; ui.setProgress(100);
+          result = completed; running = false; ui.setProgress(100); ui.setBusy(false);
           let maxLand = 0, maxSea = 0, landCount = 0;
           for (let i = 0; i < result.maxDepth.length; i++) {
             if (result.ocean[i]) maxSea = Math.max(maxSea, result.maxSurface[i]);
@@ -99,7 +99,7 @@ export function initDynamicSimulation(viewer: Cesium.Viewer, onMode: (active: bo
     function reject(message: string) {
       if (id !== generation) return;
       worker?.terminate(); worker = undefined; running = false; result = undefined;
-      layer.clear(); ui.setProgress(0); ui.setResult('');
+      layer.clear(); ui.setProgress(0); ui.setResult(''); ui.setBusy(false);
       setStatus(`計算できません：${message}`);
       readout('有効な計算結果はありません。波源の位置や条件を確認して再計算してください。');
     }

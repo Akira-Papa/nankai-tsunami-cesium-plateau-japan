@@ -33,7 +33,7 @@ export function initSimulationUi(container: HTMLElement, callbacks: SimulationUi
       </div>
       <fieldset class="simulation-source">
         <legend>仮想波源（震源位置の代用）</legend>
-        <button id="simulationPick" type="button" aria-pressed="false" aria-describedby="simulationPickHelp">地図の海上にピンを置く</button>
+        <button id="simulationPick" type="button" aria-pressed="false" aria-describedby="simulationPickHelp">📍 ピンを立てる</button>
         <button id="simulationInspect" type="button" aria-pressed="false">浸水深を調べる</button>
         <p id="simulationPickHelp" class="simulation-help">ボタンを押してから、地図の海上をクリックしてください。</p>
         <div class="simulation-coordinates">
@@ -80,6 +80,16 @@ export function initSimulationUi(container: HTMLElement, callbacks: SimulationUi
       </details>
     </div>`;
   container.append(root);
+  // Keep the primary action above the height sliders and on the map itself.
+  root.querySelector('.simulation-notice')!.after(root.querySelector('.simulation-source')!);
+  const mapTools = document.createElement('div');
+  mapTools.className = 'simulation-map-tools';
+  mapTools.innerHTML = `<button id="simulationMapPick" type="button" aria-pressed="false">📍 ピンを立てる</button><p id="simulationMapPickHint">海上に波源を置いて、津波を計算</p>`;
+  const loading = document.createElement('div');
+  loading.className = 'simulation-loading'; loading.id = 'simulationLoading'; loading.hidden = true;
+  loading.innerHTML = `<div class="simulation-loading-heading" role="status"><span class="simulation-spinner" aria-hidden="true"></span><strong>津波を計算中…</strong><button id="simulationMapCancel" type="button">中止</button></div><p id="simulationLoadingDetail"></p><progress id="simulationMapProgress" max="100" aria-label="津波計算の進捗"></progress><small>計算中も地図を操作できます</small>`;
+  document.getElementById('mapMain')!.append(mapTools, loading);
+
   const node = <T extends HTMLElement>(id: string) => root.querySelector<T>(`#${id}`)!;
   const input = (id: string) => node<HTMLInputElement>(id);
   let active = false;
@@ -88,7 +98,10 @@ export function initSimulationUi(container: HTMLElement, callbacks: SimulationUi
   const setPicking = (picking: boolean) => {
     const pick = node<HTMLButtonElement>('simulationPick');
     pick.setAttribute('aria-pressed', String(picking));
-    pick.textContent = picking ? '● ピン配置中：海上クリックで再計算' : '地図の海上にピンを置く';
+    pick.textContent = '📍 ピンを立てる';
+    document.getElementById('simulationMapPick')!.setAttribute('aria-pressed', String(picking && active));
+    document.getElementById('simulationMapPickHint')!.textContent = picking && active ? 'ピン配置中：地図の海をクリック・タップ' : active ? '地点調査中：ピンを移すときは上のボタン' : '海上に波源を置いて、津波を計算';
+    document.getElementById('cesiumContainer')!.classList.toggle('simulation-picking', picking && active);
     node('simulationInspect').setAttribute('aria-pressed', String(!picking));
     node('simulationPickHelp').textContent = picking ? 'クリックするたびに波源が移動し、自動で再計算します。数値の確認は「浸水深を調べる」へ。陸上は指定できません。' : '地点調査中です。地図クリックで浸水深を確認できます。波源を移すには上のピン配置ボタンを選んでください。';
   };
@@ -127,6 +140,8 @@ export function initSimulationUi(container: HTMLElement, callbacks: SimulationUi
       : '東経122〜150°・北緯24〜46°。範囲外は未計算です。';
     emitChange();
   });
+  document.getElementById('simulationMapPick')!.addEventListener('click', () => { if (!active) input('simulationModeCustom').click(); callbacks.onPick(); });
+  document.getElementById('simulationMapCancel')!.addEventListener('click', () => callbacks.onCancel());
   node('simulationPick').addEventListener('click', () => callbacks.onPick());
   node('simulationInspect').addEventListener('click', () => callbacks.onInspect());
   node('simulationRun').addEventListener('click', () => {
@@ -135,9 +150,11 @@ export function initSimulationUi(container: HTMLElement, callbacks: SimulationUi
   });
   node('simulationCancel').addEventListener('click', () => callbacks.onCancel());
   return {
-    setStatus(text: string) { status.textContent = text; },
+    setStatus(text: string) { status.textContent = text; document.getElementById('simulationLoadingDetail')!.textContent = text; },
+    setBusy(busy: boolean) { loading.hidden = !busy; node('simulationResult').setAttribute('aria-busy', String(busy)); if (busy) document.getElementById('simulationMapProgress')!.removeAttribute('value'); },
     setProgress(percent: number) {
       const value = Number.isFinite(percent) ? Math.min(100, Math.max(0, percent)) : 0;
+      (document.getElementById('simulationMapProgress') as HTMLProgressElement).value = value;
       node<HTMLProgressElement>('simulationProgress').value = value;
       node<HTMLOutputElement>('simulationProgressOutput').value = `${Math.round(value)}%`;
     },
