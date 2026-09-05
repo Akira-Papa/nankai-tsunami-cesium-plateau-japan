@@ -1,0 +1,20 @@
+{
+  "verifiedAt": "2026-09-05T11:36:00+09:00",
+  "url": "https://nankai-tsunami-cesium-plateau-japan.vercel.app/",
+  "implementationCommit": "0a21425",
+  "deploymentId": "dpl_4dGerGw9drjEtEUsPsTNsyKJuvT6",
+  "http": {
+    "/": 200,
+    "/inundation/manifest.json": 200,
+    "/inundation/1/100/547_140.json": 200
+  },
+  "browser": {
+    "caseId": "4",
+    "cells": 2841,
+    "resolutionM": 100,
+    "buildings": 1,
+    "preparedBatches": 12,
+    "pendingBatches": 0,
+    "consoleErrors": 0
+  }
+}
