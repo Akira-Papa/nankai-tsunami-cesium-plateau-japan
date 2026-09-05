@@ -17,7 +17,7 @@ export function initDynamicSimulation(viewer: Cesium.Viewer, onMode: (active: bo
     onMode(value) {
       active = value;
       invalidate();
-      picking = false; ui.setPicking(false);
+      picking = value; ui.setPicking(value);
       document.querySelector<HTMLElement>('#scenarioTitle')!.closest('section')!.hidden = value;
       const share = document.getElementById('shareButton') as HTMLButtonElement;
       share.disabled = value;
@@ -27,7 +27,8 @@ export function initDynamicSimulation(viewer: Cesium.Viewer, onMode: (active: bo
       if (value) { showPin(); schedule(); }
     },
     onChange() { if (active) { showPin(); schedule(); } },
-    onPick() { picking = !picking; ui.setPicking(picking); },
+    onPick() { picking = true; ui.setPicking(true); },
+    onInspect() { picking = false; ui.setPicking(false); },
     onRun() { if (active) { invalidate(); void calculate(); } },
     onCancel() { invalidate(); setStatus('計算を中止しました。再計算ボタンで実行できます。'); },
   });
@@ -86,9 +87,9 @@ export function initDynamicSimulation(viewer: Cesium.Viewer, onMode: (active: bo
             if (result.ocean[i]) maxSea = Math.max(maxSea, result.maxSurface[i]);
             else if (result.maxDepth[i] > .01) { landCount++; maxLand = Math.max(maxLand, result.maxDepth[i]); }
           }
-          setStatus(`計算完了：${config.durationMinutes}分間・${result.steps.toLocaleString()}ステップ・${resolution}`);
+          setStatus(`計算完了：波源 ${config.lon.toFixed(3)}°E / ${config.lat.toFixed(3)}°N ／ ${config.durationMinutes}分間・${result.steps.toLocaleString()}ステップ・${resolution}`);
           ui.setResult(`海上の最大水位上昇 ${maxSea.toFixed(2)}m ／ 陸上の最大浸水深 ${maxLand.toFixed(2)}m（${landCount.toLocaleString()}セル）。計算期間内の最大値です。細かな沿岸低地を表せないため、無着色から安全とは判断できません。`);
-          readout('任意条件の計算結果を表示しました。地図をクリックするとセルの数値を確認できます。');
+          readout(picking ? '再計算した結果を表示しました。海上クリックで波源を移動して再計算します。数値を見るには「浸水深を調べる」を選んでください。' : '任意条件の計算結果を表示しました。地図をクリックするとセルの数値を確認できます。');
         } else if (m.type === 'error') reject(m.message ?? '計算に失敗しました');
       };
       worker.postMessage({ type: 'start', id, grid, config }, [grid.elevation.buffer]);
@@ -110,7 +111,7 @@ export function initDynamicSimulation(viewer: Cesium.Viewer, onMode: (active: bo
       if (!active) return false;
       if (picking) {
         if (lon < 122 || lon > 150 || lat < 24 || lat > 46) { setStatus('計算範囲（東経122–150度、北緯24–46度）の海上を選んでください。'); return true; }
-        ui.setSource(lon, lat); picking = false; ui.setPicking(false); showPin(); schedule();
+        ui.setSource(lon, lat); showPin(); schedule();
       } else readout(result ? layer.inspect(lon, lat) : 'まだ計算結果がありません。完了後に地点を選択してください。');
       return true;
     },

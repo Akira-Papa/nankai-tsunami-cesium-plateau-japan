@@ -6,6 +6,7 @@ export interface SimulationUiCallbacks {
   onMode(active: boolean): void;
   onChange(config: SimulationConfig): void;
   onPick(): void;
+  onInspect(): void;
   onRun(): void;
   onCancel(): void;
 }
@@ -33,6 +34,7 @@ export function initSimulationUi(container: HTMLElement, callbacks: SimulationUi
       <fieldset class="simulation-source">
         <legend>仮想波源（震源位置の代用）</legend>
         <button id="simulationPick" type="button" aria-pressed="false" aria-describedby="simulationPickHelp">地図の海上にピンを置く</button>
+        <button id="simulationInspect" type="button" aria-pressed="false">浸水深を調べる</button>
         <p id="simulationPickHelp" class="simulation-help">ボタンを押してから、地図の海上をクリックしてください。</p>
         <div class="simulation-coordinates">
           <label for="simulationLon">経度（東経）<input id="simulationLon" type="number" min="122" max="150" step="0.001" value="134" inputmode="decimal" required></label>
@@ -86,8 +88,9 @@ export function initSimulationUi(container: HTMLElement, callbacks: SimulationUi
   const setPicking = (picking: boolean) => {
     const pick = node<HTMLButtonElement>('simulationPick');
     pick.setAttribute('aria-pressed', String(picking));
-    pick.textContent = picking ? '海上をクリック（もう一度で解除）' : '地図の海上にピンを置く';
-    node('simulationPickHelp').textContent = picking ? '地図上の海を選択してください。陸上は波源に指定できません。' : 'ボタンを押してから、地図の海上をクリックしてください。';
+    pick.textContent = picking ? '● ピン配置中：海上クリックで再計算' : '地図の海上にピンを置く';
+    node('simulationInspect').setAttribute('aria-pressed', String(!picking));
+    node('simulationPickHelp').textContent = picking ? 'クリックするたびに波源が移動し、自動で再計算します。数値の確認は「浸水深を調べる」へ。陸上は指定できません。' : '地点調査中です。地図クリックで浸水深を確認できます。波源を移すには上のピン配置ボタンを選んでください。';
   };
   const clearResult = () => { node('simulationResult').textContent = ''; };
   const emitChange = () => { clearResult(); callbacks.onChange({ ...config }); };
@@ -125,6 +128,7 @@ export function initSimulationUi(container: HTMLElement, callbacks: SimulationUi
     emitChange();
   });
   node('simulationPick').addEventListener('click', () => callbacks.onPick());
+  node('simulationInspect').addEventListener('click', () => callbacks.onInspect());
   node('simulationRun').addEventListener('click', () => {
     for (const id of ['simulationLon', 'simulationLat']) if (!input(id).reportValidity()) return;
     callbacks.onRun();

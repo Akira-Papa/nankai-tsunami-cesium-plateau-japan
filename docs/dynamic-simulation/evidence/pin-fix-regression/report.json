@@ -1,0 +1,128 @@
+{
+  "base": "http://127.0.0.1:5295",
+  "started": "2026-09-05T03:09:10.122Z",
+  "checks": [
+    {
+      "name": "起動・公式表示を維持",
+      "status": "passed",
+      "ms": 2605,
+      "detail": 2
+    },
+    {
+      "name": "全国の実地形をWorkerで動的計算",
+      "status": "passed",
+      "ms": 4137,
+      "detail": {
+        "width": 281,
+        "height": 221,
+        "steps": 47,
+        "elapsed": 300,
+        "maxSea": 5,
+        "finite": true,
+        "landWet": 0,
+        "wallMs": 2683,
+        "status": "計算完了：波源 134.000°E / 32.000°N ／ 5分間・47ステップ・0.10度（緯度方向 約11.1km）"
+      }
+    },
+    {
+      "name": "高さ変更で旧結果消去・再計算",
+      "status": "passed",
+      "ms": 904,
+      "detail": {
+        "before": 5,
+        "after": 10
+      }
+    },
+    {
+      "name": "ピン指定・地域計算・地点照会",
+      "status": "passed",
+      "ms": 1316,
+      "detail": {
+        "config": {
+          "lon": 136,
+          "lat": 32,
+          "heightM": 10,
+          "radiusKm": 50,
+          "durationMinutes": 5,
+          "domain": "regional"
+        },
+        "readout": "地形標高 -4208.0 m（海面基準）／最大水位上昇（海面基準） 10.00 m。計算時間 5 分、粗いメッシュ 約 4.7 × 5.6 km。未検証の試算であり、安全や建物ごとの浸水を判定できません。"
+      }
+    },
+    {
+      "name": "長時間・高い津波で陸上浸水色と深さを照会",
+      "status": "passed",
+      "ms": 3495,
+      "detail": {
+        "depth": 15.388611793518066,
+        "ocean": 0,
+        "lon": 133.45,
+        "lat": 33.45,
+        "steps": 1588,
+        "wallMs": 3485
+      }
+    },
+    {
+      "name": "実画面クリックで海上ピンを移動",
+      "status": "passed",
+      "ms": 1942,
+      "detail": {
+        "lon": 134,
+        "lat": 31.999,
+        "heightM": 30,
+        "radiusKm": 100,
+        "durationMinutes": 5,
+        "domain": "regional"
+      }
+    },
+    {
+      "name": "計算中止と旧Worker結果の破棄",
+      "status": "passed",
+      "ms": 2330,
+      "detail": "計算を中止しました。再計算ボタンで実行できます。"
+    },
+    {
+      "name": "無効な座標は旧結果を残さない",
+      "status": "passed",
+      "ms": 862,
+      "detail": "計算できません：波源が数値地形の範囲外です"
+    },
+    {
+      "name": "陸上波源を拒否・再試行で回復",
+      "status": "passed",
+      "ms": 1554,
+      "detail": "計算完了：波源 134.000°E / 32.000°N ／ 5分間・70ステップ・0.05度（緯度方向 約5.6km）"
+    },
+    {
+      "name": "描画失敗を完了と誤表示しない",
+      "status": "passed",
+      "ms": 532,
+      "detail": "計算完了：波源 134.000°E / 32.000°N ／ 5分間・70ステップ・0.05度（緯度方向 約5.6km）"
+    },
+    {
+      "name": "公式モード復帰・独自レイヤー破棄",
+      "status": "passed",
+      "ms": 69,
+      "detail": {
+        "cells": 2014,
+        "imagery": 1
+      }
+    },
+    {
+      "name": "モバイル操作・横溢れなし",
+      "status": "passed",
+      "ms": 2455,
+      "detail": {
+        "width": 390
+      }
+    },
+    {
+      "name": "数値地形取得失敗・再試行",
+      "status": "passed",
+      "ms": 2819,
+      "detail": "計算完了：波源 134.000°E / 32.000°N ／ 5分間・47ステップ・0.10度（緯度方向 約11.1km）"
+    }
+  ],
+  "pageErrors": [],
+  "finished": "2026-09-05T03:09:35.238Z"
+}

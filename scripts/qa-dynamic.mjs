@@ -35,7 +35,7 @@ try{
   // Feed the same geographical picking path used by the Cesium click handler; real screen pick is checked separately.
   await page.evaluate(()=>window.app.simulation.handleClick(136,32));await done();
   const config=await page.evaluate(()=>window.app.simulation.config);assert(config.lon===136&&config.lat===32,'pin not applied');
-  await page.evaluate(()=>window.app.simulation.handleClick(136,32));const text=await page.locator('#pointReadout').innerText();assert(/水位|海上|海面/.test(text),'ocean readout missing');
+  await page.locator('#simulationInspect').click();await page.evaluate(()=>window.app.simulation.handleClick(136,32));const text=await page.locator('#pointReadout').innerText();assert(/水位|海上|海面/.test(text),'ocean readout missing');
   await page.evaluate(()=>window.app.simulation.handleClick(140,40));assert(/範囲外|未計算/.test(await page.locator('#pointReadout').innerText()),'outside not unknown');
   await page.screenshot({path:out+'/regional.png',fullPage:true});return{config,readout:text};
  });

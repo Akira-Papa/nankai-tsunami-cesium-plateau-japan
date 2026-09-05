@@ -44,3 +44,5 @@
 @media(max-width:640px){.simulation-ui{padding:17px 20px}.simulation-mode span{font-size:11px}.simulation-coordinates input{font-size:16px}.simulation-actions button{min-height:44px}}
 
 .simulation-color-scale{display:grid;grid-template-columns:repeat(6,1fr);gap:3px;margin:10px 0 5px}.simulation-color-scale>div{min-width:0;display:flex;flex-direction:column;gap:2px}.simulation-color-scale i{width:100%;height:9px;border-radius:0}.simulation-color-scale span{font-size:9px;text-align:center;color:#365563;white-space:nowrap}
+
+#simulationInspect{width:100%;margin-top:6px;font-size:11px}#simulationInspect[aria-pressed=true]{background:#e3f5f4;border-color:#167d86;font-weight:700}
