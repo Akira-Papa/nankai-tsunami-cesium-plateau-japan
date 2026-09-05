@@ -1,0 +1,95 @@
+{
+  "base": "https://nankai-tsunami-cesium-plateau-japan.vercel.app",
+  "checks": [
+    {
+      "name": "noto: 50m Japan Sea source computes and renders",
+      "pass": true,
+      "detail": {
+        "config": {
+          "lon": 136.5,
+          "lat": 38,
+          "heightM": 50,
+          "radiusKm": 50,
+          "durationMinutes": 120,
+          "domain": "regional"
+        },
+        "maxSea": 50,
+        "maxLand": 20.368520736694336,
+        "finite": true,
+        "steps": 1399,
+        "elapsed": 7200,
+        "imagery": 2
+      }
+    },
+    {
+      "name": "niigata: 50m Japan Sea source computes and renders",
+      "pass": true,
+      "detail": {
+        "config": {
+          "lon": 138,
+          "lat": 38.5,
+          "heightM": 50,
+          "radiusKm": 50,
+          "durationMinutes": 120,
+          "domain": "regional"
+        },
+        "maxSea": 50,
+        "maxLand": 17.96183967590332,
+        "finite": true,
+        "steps": 1402,
+        "elapsed": 7200,
+        "imagery": 2
+      }
+    },
+    {
+      "name": "akita: 50m Japan Sea source computes and renders",
+      "pass": true,
+      "detail": {
+        "config": {
+          "lon": 138.5,
+          "lat": 40,
+          "heightM": 50,
+          "radiusKm": 50,
+          "durationMinutes": 120,
+          "domain": "regional"
+        },
+        "maxSea": 50,
+        "maxLand": 17.07758140563965,
+        "finite": true,
+        "steps": 1421,
+        "elapsed": 7200,
+        "imagery": 2
+      }
+    },
+    {
+      "name": "hokkaido: 50m Japan Sea source computes and renders",
+      "pass": true,
+      "detail": {
+        "config": {
+          "lon": 139,
+          "lat": 43.5,
+          "heightM": 50,
+          "radiusKm": 50,
+          "durationMinutes": 120,
+          "domain": "regional"
+        },
+        "maxSea": 50,
+        "maxLand": 13.698301315307617,
+        "finite": true,
+        "steps": 1463,
+        "elapsed": 7200,
+        "imagery": 2
+      }
+    },
+    {
+      "name": "lower height changes calculation and 50m can be restored",
+      "pass": true,
+      "detail": {
+        "before": 50,
+        "after": 10,
+        "restored": 50
+      }
+    }
+  ],
+  "errors": []
+}
