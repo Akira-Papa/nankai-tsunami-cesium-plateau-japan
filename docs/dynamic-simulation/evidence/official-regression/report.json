@@ -1,0 +1,424 @@
+{
+  "base": "http://127.0.0.1:5295",
+  "started": "2026-09-05T02:54:58.247Z",
+  "checks": [
+    {
+      "name": "desktop: local app boot and WebGL canvas",
+      "status": "passed",
+      "detail": {
+        "cases": [
+          "1",
+          "4"
+        ],
+        "canvas": {
+          "x": 320,
+          "y": 76,
+          "width": 1120,
+          "height": 924,
+          "top": 76,
+          "right": 1440,
+          "bottom": 1000,
+          "left": 320
+        },
+        "destroyed": false
+      }
+    },
+    {
+      "name": "desktop: actual local inundation data loaded",
+      "status": "passed",
+      "detail": {
+        "count": 6288,
+        "resolutionM": 2500,
+        "stats": {
+          "total": 6288,
+          "visible": 6288,
+          "preparedBatches": 25,
+          "pendingBatches": 0
+        },
+        "status": "6,288集約セル・2500m表示 ／ 3D地形 ／ 建物 0件"
+      }
+    },
+    {
+      "name": "four coastal cities: data, terrain and GPU batches",
+      "status": "passed",
+      "detail": [
+        {
+          "count": 2842,
+          "resolutionM": 100,
+          "stats": {
+            "total": 2842,
+            "visible": 2842,
+            "preparedBatches": 12,
+            "pendingBatches": 0
+          },
+          "status": "2,842集約セル・100m表示 ／ 3D地形 ／ 建物 0件（読込中）"
+        },
+        {
+          "count": 2624,
+          "resolutionM": 100,
+          "stats": {
+            "total": 2624,
+            "visible": 2624,
+            "preparedBatches": 11,
+            "pendingBatches": 0
+          },
+          "status": "2,624集約セル・100m表示 ／ 3D地形 ／ 建物 3件"
+        },
+        {
+          "count": 1950,
+          "resolutionM": 100,
+          "stats": {
+            "total": 1950,
+            "visible": 1950,
+            "preparedBatches": 8,
+            "pendingBatches": 0
+          },
+          "status": "1,950集約セル・100m表示 ／ 3D地形 ／ 建物 3件"
+        },
+        {
+          "count": 3003,
+          "resolutionM": 100,
+          "stats": {
+            "total": 3003,
+            "visible": 3003,
+            "preparedBatches": 12,
+            "pendingBatches": 0
+          },
+          "status": "3,003集約セル・100m表示 ／ 3D地形 ／ 建物 3件"
+        }
+      ]
+    },
+    {
+      "name": "arrival: 0 minutes preserved and point inspection completes",
+      "status": "passed",
+      "detail": "33.55000, 133.55000｜周辺100m集約の最大浸水深 2.49m｜51.8分（1cmへ最早到達）｜指定0分時点：まだ到達記録なし。最大深さは指定時刻の水深ではありません。出典：内閣府2025／ケース01｜越流時に堤防破堤"
+    },
+    {
+      "name": "arrival playback: advances, stops, and stops at 720 minutes",
+      "status": "passed",
+      "detail": "manual stop and 720-minute automatic stop verified"
+    },
+    {
+      "name": "case change: point cleared and camera retained",
+      "status": "passed",
+      "detail": {
+        "id": "4",
+        "height": 13999.999999996719,
+        "point": "地図上をクリックすると、その周辺の集約浸水データを確認できます。"
+      }
+    },
+    {
+      "name": "share URL restores display state on reload",
+      "status": "passed",
+      "detail": "http://127.0.0.1:5295/?case=4&mode=arrival&min=0&opacity=0.75&buildings=1&photo=0&lite=0&lon=135.45000&lat=34.58500&height=14000&heading=360.00&pitch=-55.00"
+    },
+    {
+      "name": "mobile 390x844: controls and collapsed map",
+      "status": "passed",
+      "detail": {
+        "scroll": 390,
+        "inner": 390
+      }
+    },
+    {
+      "name": "manifest outage: map remains operable and retry recovers",
+      "status": "passed",
+      "detail": "national map/city navigation survive missing data; reload retry restores cases"
+    },
+    {
+      "name": "terrain outage: explicit flat fallback and real data retained",
+      "status": "passed",
+      "detail": "6,288集約セル・2500m表示 ／ 地形取得失敗：平坦な地球で表示（標高なし） ／ 建物 0件"
+    },
+    {
+      "name": "fault injection: failed new case cannot show stale cells",
+      "status": "passed",
+      "detail": "503 is visible; previous cells removed; retry restored real data"
+    }
+  ],
+  "externalFailures": [
+    {
+      "url": "https://assets.cms.plateau.reearth.io/assets/ea/bf8edc-e0d9-466f-a9f7-822b3ef34851/23100_nagoya-shi_city_2022_citygml_4_op_bldg_3dtiles_23106_naka-ku_lod1/data/data46.b3dm",
+      "failure": "net::ERR_ABORTED"
+    },
+    {
+      "url": "https://assets.cms.plateau.reearth.io/assets/20/220623-b369-4fd9-9525-0cf09de0c447/23100_nagoya-shi_city_2022_citygml_4_op_bldg_3dtiles_23105_nakamura-ku_lod1/data/data8.b3dm",
+      "failure": "net::ERR_ABORTED"
+    },
+    {
+      "url": "https://assets.cms.plateau.reearth.io/assets/20/220623-b369-4fd9-9525-0cf09de0c447/23100_nagoya-shi_city_2022_citygml_4_op_bldg_3dtiles_23105_nakamura-ku_lod1/data/data7.b3dm",
+      "failure": "net::ERR_ABORTED"
+    },
+    {
+      "url": "https://assets.cms.plateau.reearth.io/assets/ea/bf8edc-e0d9-466f-a9f7-822b3ef34851/23100_nagoya-shi_city_2022_citygml_4_op_bldg_3dtiles_23106_naka-ku_lod1/data/data45.b3dm",
+      "failure": "net::ERR_ABORTED"
+    },
+    {
+      "url": "https://assets.cms.plateau.reearth.io/assets/ea/bf8edc-e0d9-466f-a9f7-822b3ef34851/23100_nagoya-shi_city_2022_citygml_4_op_bldg_3dtiles_23106_naka-ku_lod1/data/data44.b3dm",
+      "failure": "net::ERR_ABORTED"
+    },
+    {
+      "url": "https://assets.cms.plateau.reearth.io/assets/20/220623-b369-4fd9-9525-0cf09de0c447/23100_nagoya-shi_city_2022_citygml_4_op_bldg_3dtiles_23105_nakamura-ku_lod1/data/data6.b3dm",
+      "failure": "net::ERR_ABORTED"
+    },
+    {
+      "url": "https://assets.cms.plateau.reearth.io/assets/db/dadcf8-1214-4161-bf22-a60d9142cfc7/27100_osaka-shi_city_2025_citygml_1_op_bldg_3dtiles_27103_fukushima-ku_lod1/data/data14.b3dm",
+      "failure": "net::ERR_ABORTED"
+    },
+    {
+      "url": "https://assets.cms.plateau.reearth.io/assets/87/d206f3-29c6-4b1e-8135-08f9a9a870a3/27100_osaka-shi_city_2025_citygml_1_op_bldg_3dtiles_27113_nishiyodogawa-ku_lod1/data/data47.b3dm",
+      "failure": "net::ERR_ABORTED"
+    },
+    {
+      "url": "https://assets.cms.plateau.reearth.io/assets/db/dadcf8-1214-4161-bf22-a60d9142cfc7/27100_osaka-shi_city_2025_citygml_1_op_bldg_3dtiles_27103_fukushima-ku_lod1/data/data12.b3dm",
+      "failure": "net::ERR_ABORTED"
+    },
+    {
+      "url": "https://assets.cms.plateau.reearth.io/assets/da/6340ff-d3c4-4e15-8577-975d0ba44446/27100_osaka-shi_city_2025_citygml_1_op_bldg_3dtiles_27123_yodogawa-ku_lod1/data/data15.b3dm",
+      "failure": "net::ERR_ABORTED"
+    },
+    {
+      "url": "https://assets.cms.plateau.reearth.io/assets/db/dadcf8-1214-4161-bf22-a60d9142cfc7/27100_osaka-shi_city_2025_citygml_1_op_bldg_3dtiles_27103_fukushima-ku_lod1/data/data11.b3dm",
+      "failure": "net::ERR_ABORTED"
+    },
+    {
+      "url": "https://assets.cms.plateau.reearth.io/assets/da/6340ff-d3c4-4e15-8577-975d0ba44446/27100_osaka-shi_city_2025_citygml_1_op_bldg_3dtiles_27123_yodogawa-ku_lod1/data/data11.b3dm",
+      "failure": "net::ERR_ABORTED"
+    },
+    {
+      "url": "https://assets.cms.plateau.reearth.io/assets/da/6340ff-d3c4-4e15-8577-975d0ba44446/27100_osaka-shi_city_2025_citygml_1_op_bldg_3dtiles_27123_yodogawa-ku_lod1/data/data12.b3dm",
+      "failure": "net::ERR_ABORTED"
+    },
+    {
+      "url": "https://assets.cms.plateau.reearth.io/assets/da/6340ff-d3c4-4e15-8577-975d0ba44446/27100_osaka-shi_city_2025_citygml_1_op_bldg_3dtiles_27123_yodogawa-ku_lod1/data/data10.b3dm",
+      "failure": "net::ERR_ABORTED"
+    },
+    {
+      "url": "https://assets.cms.plateau.reearth.io/assets/da/6340ff-d3c4-4e15-8577-975d0ba44446/27100_osaka-shi_city_2025_citygml_1_op_bldg_3dtiles_27123_yodogawa-ku_lod1/data/data45.b3dm",
+      "failure": "net::ERR_ABORTED"
+    },
+    {
+      "url": "https://assets.cms.plateau.reearth.io/assets/da/6340ff-d3c4-4e15-8577-975d0ba44446/27100_osaka-shi_city_2025_citygml_1_op_bldg_3dtiles_27123_yodogawa-ku_lod1/data/data43.b3dm",
+      "failure": "net::ERR_ABORTED"
+    },
+    {
+      "url": "https://assets.cms.plateau.reearth.io/assets/db/dadcf8-1214-4161-bf22-a60d9142cfc7/27100_osaka-shi_city_2025_citygml_1_op_bldg_3dtiles_27103_fukushima-ku_lod1/data/data15.b3dm",
+      "failure": "net::ERR_ABORTED"
+    },
+    {
+      "url": "https://assets.cms.plateau.reearth.io/assets/db/dadcf8-1214-4161-bf22-a60d9142cfc7/27100_osaka-shi_city_2025_citygml_1_op_bldg_3dtiles_27103_fukushima-ku_lod1/data/data16.b3dm",
+      "failure": "net::ERR_ABORTED"
+    },
+    {
+      "url": "https://assets.cms.plateau.reearth.io/assets/da/6340ff-d3c4-4e15-8577-975d0ba44446/27100_osaka-shi_city_2025_citygml_1_op_bldg_3dtiles_27123_yodogawa-ku_lod1/data/data14.b3dm",
+      "failure": "net::ERR_ABORTED"
+    },
+    {
+      "url": "https://assets.cms.plateau.reearth.io/assets/da/6340ff-d3c4-4e15-8577-975d0ba44446/27100_osaka-shi_city_2025_citygml_1_op_bldg_3dtiles_27123_yodogawa-ku_lod1/data/data44.b3dm",
+      "failure": "net::ERR_ABORTED"
+    },
+    {
+      "url": "https://assets.cms.plateau.reearth.io/assets/da/6340ff-d3c4-4e15-8577-975d0ba44446/27100_osaka-shi_city_2025_citygml_1_op_bldg_3dtiles_27123_yodogawa-ku_lod1/data/data17.b3dm",
+      "failure": "net::ERR_ABORTED"
+    },
+    {
+      "url": "https://assets.cms.plateau.reearth.io/assets/da/6340ff-d3c4-4e15-8577-975d0ba44446/27100_osaka-shi_city_2025_citygml_1_op_bldg_3dtiles_27123_yodogawa-ku_lod1/data/data42.b3dm",
+      "failure": "net::ERR_ABORTED"
+    },
+    {
+      "url": "https://assets.cms.plateau.reearth.io/assets/da/6340ff-d3c4-4e15-8577-975d0ba44446/27100_osaka-shi_city_2025_citygml_1_op_bldg_3dtiles_27123_yodogawa-ku_lod1/data/data9.b3dm",
+      "failure": "net::ERR_ABORTED"
+    },
+    {
+      "url": "https://assets.cms.plateau.reearth.io/assets/da/6340ff-d3c4-4e15-8577-975d0ba44446/27100_osaka-shi_city_2025_citygml_1_op_bldg_3dtiles_27123_yodogawa-ku_lod1/data/data16.b3dm",
+      "failure": "net::ERR_ABORTED"
+    },
+    {
+      "url": "https://tile.plateauview.mlit.go.jp/terrain/10/1804/712.terrain",
+      "failure": "net::ERR_ABORTED"
+    },
+    {
+      "url": "https://tile.plateauview.mlit.go.jp/terrain/1/3/1.terrain",
+      "failure": "net::ERR_ABORTED"
+    },
+    {
+      "url": "https://tile.plateauview.mlit.go.jp/terrain/10/1804/713.terrain",
+      "failure": "net::ERR_ABORTED"
+    },
+    {
+      "url": "https://tile.plateauview.mlit.go.jp/terrain/10/1802/712.terrain",
+      "failure": "net::ERR_ABORTED"
+    },
+    {
+      "url": "https://tile.plateauview.mlit.go.jp/terrain/10/1802/713.terrain",
+      "failure": "net::ERR_ABORTED"
+    },
+    {
+      "url": "https://tile.plateauview.mlit.go.jp/terrain/9/901/357.terrain",
+      "failure": "net::ERR_ABORTED"
+    },
+    {
+      "url": "https://tile.plateauview.mlit.go.jp/terrain/9/903/357.terrain",
+      "failure": "net::ERR_ABORTED"
+    },
+    {
+      "url": "https://tile.plateauview.mlit.go.jp/terrain/10/1803/713.terrain",
+      "failure": "net::ERR_ABORTED"
+    },
+    {
+      "url": "https://tile.plateauview.mlit.go.jp/terrain/10/1805/712.terrain",
+      "failure": "net::ERR_ABORTED"
+    },
+    {
+      "url": "https://tile.plateauview.mlit.go.jp/terrain/9/902/357.terrain",
+      "failure": "net::ERR_ABORTED"
+    },
+    {
+      "url": "https://tile.plateauview.mlit.go.jp/terrain/10/1801/712.terrain",
+      "failure": "net::ERR_ABORTED"
+    },
+    {
+      "url": "https://tile.plateauview.mlit.go.jp/terrain/10/1803/711.terrain",
+      "failure": "net::ERR_ABORTED"
+    },
+    {
+      "url": "https://tile.plateauview.mlit.go.jp/terrain/10/1801/713.terrain",
+      "failure": "net::ERR_ABORTED"
+    },
+    {
+      "url": "https://tile.plateauview.mlit.go.jp/terrain/10/1803/712.terrain",
+      "failure": "net::ERR_ABORTED"
+    },
+    {
+      "url": "https://tile.plateauview.mlit.go.jp/terrain/10/1802/711.terrain",
+      "failure": "net::ERR_ABORTED"
+    },
+    {
+      "url": "https://tile.plateauview.mlit.go.jp/terrain/10/1805/713.terrain",
+      "failure": "net::ERR_ABORTED"
+    },
+    {
+      "url": "https://tile.plateauview.mlit.go.jp/terrain/9/900/357.terrain",
+      "failure": "net::ERR_ABORTED"
+    },
+    {
+      "url": "https://tile.plateauview.mlit.go.jp/terrain/10/1804/711.terrain",
+      "failure": "net::ERR_ABORTED"
+    },
+    {
+      "url": "https://fonts.gstatic.com/s/notosansjp/v56/-F62fjtqLzI2JPCgQBnw7HFowwII2lcnk-AFfrgQrvWXpdFg3KXxAMsKMbdN.114.woff2",
+      "failure": "net::ERR_ABORTED"
+    },
+    {
+      "url": "https://fonts.gstatic.com/s/notosansjp/v56/-F62fjtqLzI2JPCgQBnw7HFowwII2lcnk-AFfrgQrvWXpdFg3KXxAMsKMbdN.106.woff2",
+      "failure": "net::ERR_ABORTED"
+    },
+    {
+      "url": "https://fonts.gstatic.com/s/notosansjp/v56/-F62fjtqLzI2JPCgQBnw7HFowwII2lcnk-AFfrgQrvWXpdFg3KXxAMsKMbdN.97.woff2",
+      "failure": "net::ERR_ABORTED"
+    },
+    {
+      "url": "https://fonts.gstatic.com/s/notosansjp/v56/-F62fjtqLzI2JPCgQBnw7HFowwII2lcnk-AFfrgQrvWXpdFg3KXxAMsKMbdN.112.woff2",
+      "failure": "net::ERR_ABORTED"
+    },
+    {
+      "url": "https://fonts.gstatic.com/s/notosansjp/v56/-F62fjtqLzI2JPCgQBnw7HFowwII2lcnk-AFfrgQrvWXpdFg3KXxAMsKMbdN.113.woff2",
+      "failure": "net::ERR_ABORTED"
+    },
+    {
+      "url": "https://fonts.gstatic.com/s/notosansjp/v56/-F62fjtqLzI2JPCgQBnw7HFowwII2lcnk-AFfrgQrvWXpdFg3KXxAMsKMbdN.104.woff2",
+      "failure": "net::ERR_ABORTED"
+    },
+    {
+      "url": "https://fonts.gstatic.com/s/notosansjp/v56/-F62fjtqLzI2JPCgQBnw7HFowwII2lcnk-AFfrgQrvWXpdFg3KXxAMsKMbdN.49.woff2",
+      "failure": "net::ERR_ABORTED"
+    },
+    {
+      "url": "https://fonts.gstatic.com/s/notosansjp/v56/-F62fjtqLzI2JPCgQBnw7HFowwII2lcnk-AFfrgQrvWXpdFg3KXxAMsKMbdN.110.woff2",
+      "failure": "net::ERR_ABORTED"
+    },
+    {
+      "url": "https://fonts.gstatic.com/s/notosansjp/v56/-F62fjtqLzI2JPCgQBnw7HFowwII2lcnk-AFfrgQrvWXpdFg3KXxAMsKMbdN.119.woff2",
+      "failure": "net::ERR_ABORTED"
+    },
+    {
+      "url": "https://fonts.gstatic.com/s/notosansjp/v56/-F62fjtqLzI2JPCgQBnw7HFowwII2lcnk-AFfrgQrvWXpdFg3KXxAMsKMbdN.101.woff2",
+      "failure": "net::ERR_ABORTED"
+    },
+    {
+      "url": "https://fonts.gstatic.com/s/notosansjp/v56/-F62fjtqLzI2JPCgQBnw7HFowwII2lcnk-AFfrgQrvWXpdFg3KXxAMsKMbdN.82.woff2",
+      "failure": "net::ERR_ABORTED"
+    },
+    {
+      "url": "https://fonts.gstatic.com/s/notosansjp/v56/-F62fjtqLzI2JPCgQBnw7HFowwII2lcnk-AFfrgQrvWXpdFg3KXxAMsKMbdN.93.woff2",
+      "failure": "net::ERR_ABORTED"
+    },
+    {
+      "url": "https://fonts.gstatic.com/s/notosansjp/v56/-F62fjtqLzI2JPCgQBnw7HFowwII2lcnk-AFfrgQrvWXpdFg3KXxAMsKMbdN.105.woff2",
+      "failure": "net::ERR_ABORTED"
+    },
+    {
+      "url": "https://fonts.gstatic.com/s/notosansjp/v56/-F62fjtqLzI2JPCgQBnw7HFowwII2lcnk-AFfrgQrvWXpdFg3KXxAMsKMbdN.98.woff2",
+      "failure": "net::ERR_ABORTED"
+    },
+    {
+      "url": "https://fonts.gstatic.com/s/notosansjp/v56/-F62fjtqLzI2JPCgQBnw7HFowwII2lcnk-AFfrgQrvWXpdFg3KXxAMsKMbdN.27.woff2",
+      "failure": "net::ERR_ABORTED"
+    },
+    {
+      "url": "https://fonts.gstatic.com/s/notosansjp/v56/-F62fjtqLzI2JPCgQBnw7HFowwII2lcnk-AFfrgQrvWXpdFg3KXxAMsKMbdN.108.woff2",
+      "failure": "net::ERR_ABORTED"
+    },
+    {
+      "url": "https://fonts.gstatic.com/s/notosansjp/v56/-F62fjtqLzI2JPCgQBnw7HFowwII2lcnk-AFfrgQrvWXpdFg3KXxAMsKMbdN.87.woff2",
+      "failure": "net::ERR_ABORTED"
+    },
+    {
+      "url": "https://fonts.gstatic.com/s/notosansjp/v56/-F62fjtqLzI2JPCgQBnw7HFowwII2lcnk-AFfrgQrvWXpdFg3KXxAMsKMbdN.100.woff2",
+      "failure": "net::ERR_ABORTED"
+    },
+    {
+      "url": "https://fonts.gstatic.com/s/notosansjp/v56/-F62fjtqLzI2JPCgQBnw7HFowwII2lcnk-AFfrgQrvWXpdFg3KXxAMsKMbdN.115.woff2",
+      "failure": "net::ERR_ABORTED"
+    },
+    {
+      "url": "https://fonts.gstatic.com/s/notosansjp/v56/-F62fjtqLzI2JPCgQBnw7HFowwII2lcnk-AFfrgQrvWXpdFg3KXxAMsKMbdN.111.woff2",
+      "failure": "net::ERR_ABORTED"
+    },
+    {
+      "url": "https://fonts.gstatic.com/s/notosansjp/v56/-F62fjtqLzI2JPCgQBnw7HFowwII2lcnk-AFfrgQrvWXpdFg3KXxAMsKMbdN.83.woff2",
+      "failure": "net::ERR_ABORTED"
+    },
+    {
+      "url": "https://fonts.gstatic.com/s/notosansjp/v56/-F62fjtqLzI2JPCgQBnw7HFowwII2lcnk-AFfrgQrvWXpdFg3KXxAMsKMbdN.102.woff2",
+      "failure": "net::ERR_ABORTED"
+    },
+    {
+      "url": "https://fonts.gstatic.com/s/notosansjp/v56/-F62fjtqLzI2JPCgQBnw7HFowwII2lcnk-AFfrgQrvWXpdFg3KXxAMsKMbdN.117.woff2",
+      "failure": "net::ERR_ABORTED"
+    },
+    {
+      "url": "https://fonts.gstatic.com/s/notosansjp/v56/-F62fjtqLzI2JPCgQBnw7HFowwII2lcnk-AFfrgQrvWXpdFg3KXxAMsKMbdN.107.woff2",
+      "failure": "net::ERR_ABORTED"
+    },
+    {
+      "url": "https://fonts.gstatic.com/s/notosansjp/v56/-F62fjtqLzI2JPCgQBnw7HFowwII2lcnk-AFfrgQrvWXpdFg3KXxAMsKMbdN.58.woff2",
+      "failure": "net::ERR_ABORTED"
+    },
+    {
+      "url": "https://fonts.gstatic.com/s/notosansjp/v56/-F62fjtqLzI2JPCgQBnw7HFowwII2lcnk-AFfrgQrvWXpdFg3KXxAMsKMbdN.103.woff2",
+      "failure": "net::ERR_ABORTED"
+    },
+    {
+      "url": "https://fonts.gstatic.com/s/notosansjp/v56/-F62fjtqLzI2JPCgQBnw7HFowwII2lcnk-AFfrgQrvWXpdFg3KXxAMsKMbdN.118.woff2",
+      "failure": "net::ERR_ABORTED"
+    },
+    {
+      "url": "https://fonts.gstatic.com/s/notosansjp/v56/-F62fjtqLzI2JPCgQBnw7HFowwII2lcnk-AFfrgQrvWXpdFg3KXxAMsKMbdN.96.woff2",
+      "failure": "net::ERR_ABORTED"
+    }
+  ],
+  "localFailures": [],
+  "pageErrors": [],
+  "finished": "2026-09-05T02:55:30.356Z"
+}

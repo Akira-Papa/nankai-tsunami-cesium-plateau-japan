@@ -9,10 +9,12 @@ import { initExplorerUi, type ExplorerState } from './explorerUi';
 import { loadManifest, loadView, type InundationCell } from './inundationData';
 import { createInundationLayer, cellBounds } from './inundationLayer';
 import { readShare, shareSearch, type CameraState } from './explorerState';
+import { initDynamicSimulation } from './dynamicSimulation';
 
 Cesium.Ion.defaultAccessToken = '';
 const degrees = Cesium.Math.toDegrees;
 let ui: ReturnType<typeof initExplorerUi> | undefined;
+let simulation: ReturnType<typeof initDynamicSimulation> | undefined;
 let viewer: Cesium.Viewer;
 let layer: ReturnType<typeof createInundationLayer>;
 let buildings: TilesetManager | undefined;
@@ -60,6 +62,7 @@ function scheduleRefresh() {
   refreshTimer=window.setTimeout(() => { void refresh(); buildings?.update(); },250);
 }
 async function refresh() {
+  if (simulation?.active) return;
   if(!current || !current.caseId) {dataStatus='浸水データ未読込：再試行ボタンを押してください';status();return;}
   clearTimeout(refreshTimer);
   const epoch=++viewEpoch;
@@ -103,6 +106,7 @@ function locate(code:string) {
   setCamera({lon,lat:lat-.065,height:14000,heading:0,pitch:-55},1.2);
 }
 async function inspectPoint(lon:number,lat:number) {
+  if (simulation?.handleClick(lon,lat)) return;
   const epoch=++pickEpoch, caseId=current.caseId;
   lastPoint={lon,lat};
   ui?.setReadout(`${lat.toFixed(5)}, ${lon.toFixed(5)}：周辺100m集約データを読込中`);
@@ -143,8 +147,16 @@ async function boot() {
       catch{ui?.setReadout(`共有URL（アドレス欄からもコピーできます）：${url.href}`);}
     },
   });
+  simulation=initDynamicSimulation(viewer,(active)=>{
+    ++viewEpoch; clearPick(); layer.clear(); cells=[];
+    const play=document.getElementById('playArrival');
+    if(play?.getAttribute('aria-pressed')==='true')play.click();
+    dataStatus=active?'任意条件の実験計算モード':'計算済みデータへ切替中';
+    const badge=document.querySelector('.map-badge');if(badge)badge.textContent=active?'全国3D · 任意条件の実験計算':'全国3D · 計算済み浸水データ';
+    if(!active)void refresh(); status();
+  },text=>ui?.setReadout(text),text=>{dataStatus=text;status();});
   if(startupWarning)ui.setDataNote('計算済みデータの取得に失敗しました。未取得の状態では浸水の有無を判断できません。データを再試行してください。');
-  document.getElementById('retryData')?.addEventListener('click',()=>{if(startupWarning)location.reload();else void refresh();});
+  document.getElementById('retryData')?.addEventListener('click',()=>{if(simulation?.active)simulation.retry();else if(startupWarning)location.reload();else void refresh();});
   buildings=createTilesetManager(viewer,{registry:{generated:data.registry.generated,source:data.registry.source,tilesets:data.registry.tilesets.filter(t=>t.lod===1||t.lod===2).map(t=>({...t,lod:t.lod as 1|2,http_status:t.http_status??undefined})) as PlateauTilesetEntry[]},inundationShading:false,maxConcurrent:2,maxLoaded:3,lruSize:1,maxCameraHeight:45000,lod2:false,onStatus:status});
   // Buildings preserve their source appearance; no uniform water shading.
   apply(ui.getState());
@@ -157,11 +169,12 @@ async function boot() {
   handler.setInputAction((e:Cesium.ScreenSpaceEventHandler.PositionedEvent)=>{
     const ray=viewer.camera.getPickRay(e.position);const cart=ray?viewer.scene.globe.pick(ray,viewer.scene):undefined;
     if(!cart)return;const c=Cesium.Cartographic.fromCartesian(cart);
+    if(simulation?.handleClick(degrees(c.longitude),degrees(c.latitude)))return;
     if(!marker)marker=viewer.entities.add({position:cart,point:{pixelSize:11,color:Cesium.Color.WHITE,outlineColor:Cesium.Color.BLACK,outlineWidth:2,disableDepthTestDistance:Infinity}});
     marker.position=new Cesium.ConstantPositionProperty(cart);marker.show=true;
     void inspectPoint(degrees(c.longitude),degrees(c.latitude));viewer.scene.requestRender();
   },Cesium.ScreenSpaceEventType.LEFT_CLICK);
-  Object.assign(window,{viewer,app:{viewer,ui,locate,overview,inspectPoint,refresh,get cells(){return cells;},get manifest(){return manifest;},get state(){return current;},get resolutionM(){return resolutionM;},get layerStats(){return layer.stats();}}});
+  Object.assign(window,{viewer,app:{viewer,ui,get simulation(){return simulation;},locate,overview,inspectPoint,refresh,get cells(){return cells;},get manifest(){return manifest;},get state(){return current;},get resolutionM(){return resolutionM;},get layerStats(){return layer.stats();}}});
   try {
     viewer.terrainProvider=await Cesium.CesiumTerrainProvider.fromUrl(TERRAIN_URL,{requestVertexNormals:false,credit:new Cesium.Credit('PLATEAU 地形・国土地理院',true)});
     terrainState='3D地形'; viewer.terrainProvider.errorEvent.addEventListener(()=>{terrainState='地形の一部を取得できません';status();});

@@ -1,0 +1,46 @@
+.simulation-ui{padding:18px 22px;border-bottom:1px solid var(--border,#dfe6e8);color:var(--navy,#122d42);background:#fff}
+.simulation-mode{display:flex;gap:4px;border:0;margin:0;padding:0;min-width:0}
+.simulation-mode legend{font-size:11px;font-weight:700;margin-bottom:10px}
+.simulation-mode label{position:relative;flex:1;min-width:0;cursor:pointer}
+.simulation-mode input{position:absolute;opacity:0;inset:0;width:100%;height:100%;margin:0}
+.simulation-mode span{display:block;text-align:center;padding:11px 3px;border:1px solid #dce5e8;border-radius:6px;font-size:10px;white-space:nowrap;background:#f5f8f9}
+.simulation-mode input:checked+span{background:#122d42;color:#fff;border-color:#122d42}
+.simulation-mode input:focus-visible+span{outline:3px solid #138798;outline-offset:3px}
+.simulation-notice{font-size:11px;line-height:1.8;font-weight:600;margin:16px 0;padding:10px 12px;background:#fff7e8;border-left:3px solid #d69a36;color:#765520}
+.simulation-field{display:grid;grid-template-columns:1fr auto;gap:4px 8px;margin-top:17px;align-items:center}
+.simulation-field>label{font-size:11px;line-height:1.7}
+.simulation-field>output{font-size:15px;font-weight:700;color:#167d86;font-variant-numeric:tabular-nums;white-space:nowrap}
+.simulation-field>input,.simulation-field>.simulation-help,.simulation-range{grid-column:1/-1}
+.simulation-range{display:flex;justify-content:space-between;font-size:10px;color:#697e88}
+.simulation-help{font-size:10px;line-height:1.8;color:#5b727f;margin:6px 0 0;overflow-wrap:anywhere}
+.simulation-source{border:0;border-top:1px solid #dfe6e8;padding:10px 0 0;margin:19px 0 0;min-width:0}
+.simulation-source legend{font-size:11px;font-weight:700;padding:0 6px 0 0}
+#simulationPick{width:100%;font-size:11px;color:#167d86;border-color:#9fc7cb;padding:8px 5px}
+#simulationPick[aria-pressed=true]{background:#e3f5f4;border-color:#167d86;font-weight:700}
+.simulation-coordinates{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px}
+.simulation-coordinates label{min-width:0;color:#5b727f}
+.simulation-coordinates input{display:block;width:100%;min-width:0;border:1px solid #cfdcde;border-radius:6px;background:#fff;padding:7px 8px;color:#122d42;margin-top:5px;font-size:12px}
+.simulation-domain-label{display:block;margin-top:18px}
+.simulation-actions{display:flex;gap:8px;margin:15px 0 12px}
+.simulation-actions button{font-size:11px;padding:7px 10px}
+#simulationRun{flex:1;background:#167d86;color:white;border-color:#167d86}
+#simulationRun:hover{background:#126b73}
+.simulation-progress-label{display:flex;justify-content:space-between;font-size:10px!important;color:#5b727f}
+#simulationProgress{display:block;width:100%;height:8px;margin:7px 0;accent-color:#167d86;border:0;border-radius:5px;overflow:hidden;background:#edf2f3}
+#simulationProgress::-webkit-progress-bar{background:#edf2f3}
+#simulationProgress::-webkit-progress-value{background:#167d86}
+.simulation-status,.simulation-result{font-size:11px;line-height:1.8;white-space:pre-line;overflow-wrap:anywhere}
+.simulation-status:empty,.simulation-result:empty{display:none}
+.simulation-result{padding:10px;background:#f2f7f7;border-radius:6px}
+.simulation-legend{border-top:1px solid #dfe6e8;margin-top:16px;padding-top:9px}
+.simulation-legend>p:not(.simulation-help){font-size:10px;margin:8px 0;display:flex;align-items:center;gap:7px}
+.simulation-legend i{display:inline-block;width:37px;height:8px;border-radius:2px;flex-shrink:0}
+.simulation-ocean-key{background:linear-gradient(90deg,#a2daf2,#1960c5)}
+.simulation-land-key{background:linear-gradient(90deg,#ffe99a,#cc1744)}
+.simulation-assumptions{font-size:10px;line-height:1.8;color:#5b727f;margin-top:14px}
+.simulation-assumptions summary{cursor:pointer;color:#365563;font-weight:600;min-height:30px}
+.simulation-assumptions p{margin:5px 0 10px}
+@media(min-width:1500px){.simulation-ui{padding:20px 26px}}
+@media(max-width:640px){.simulation-ui{padding:17px 20px}.simulation-mode span{font-size:11px}.simulation-coordinates input{font-size:16px}.simulation-actions button{min-height:44px}}
+
+.simulation-color-scale{display:grid;grid-template-columns:repeat(6,1fr);gap:3px;margin:10px 0 5px}.simulation-color-scale>div{min-width:0;display:flex;flex-direction:column;gap:2px}.simulation-color-scale i{width:100%;height:9px;border-radius:0}.simulation-color-scale span{font-size:9px;text-align:center;color:#365563;white-space:nowrap}
