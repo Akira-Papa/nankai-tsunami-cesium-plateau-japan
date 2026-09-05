@@ -24,6 +24,7 @@ export function initSimulationUi(container: HTMLElement, callbacks: SimulationUi
       <label><input id="simulationModeCustom" type="radio" name="simulationMode" value="custom"><span>任意条件で計算</span></label>
     </fieldset>
     <div id="simulationControls" hidden>
+      <div class="simulation-reference"><strong>海岸のピンク〜紫：公式の参考表示</strong><p id="simulationReferenceNote">内閣府2025の計算済み浸水を重ねています。ピンから再計算した結果とは別のデータです。</p><p>任意条件の計算結果は、海が青・陸が黄〜赤です。</p></div>
       <p class="simulation-notice">数kmメッシュの実験計算・実災害の予測ではありません</p>
       <div class="simulation-field">
         <label for="simulationHeight">波源の津波高（初期水面上昇）</label>

@@ -1,0 +1,100 @@
+{
+  "base": "http://127.0.0.1:5295",
+  "checks": [
+    {
+      "name": "initial coast",
+      "detail": {
+        "cells": 6288,
+        "stats": {
+          "total": 6288,
+          "visible": 6288,
+          "preparedBatches": 17,
+          "pendingBatches": 8
+        },
+        "note": "内閣府2025・ケース01｜越流時に堤防破堤 ／ 6,288集約セル・2500m表示。ピンの位置・選んだ津波高では変わらない公式の参考表示です。日本海側など未収録の範囲には表示されません。"
+      }
+    },
+    {
+      "name": "coast after custom mode",
+      "detail": {
+        "cells": 6288,
+        "stats": {
+          "total": 6288,
+          "visible": 6288,
+          "preparedBatches": 25,
+          "pendingBatches": 0
+        },
+        "note": "内閣府2025・ケース01｜越流時に堤防破堤 ／ 6,288集約セル・2500m表示。ピンの位置・選んだ津波高では変わらない公式の参考表示です。日本海側など未収録の範囲には表示されません。"
+      }
+    },
+    {
+      "name": "coast after pin -100",
+      "source": 134.201,
+      "detail": {
+        "cells": 3876,
+        "stats": {
+          "total": 3876,
+          "visible": 3876,
+          "preparedBatches": 16,
+          "pendingBatches": 0
+        },
+        "note": "内閣府2025・ケース01｜越流時に堤防破堤 ／ 3,876集約セル・2500m表示。ピンの位置・選んだ津波高では変わらない公式の参考表示です。日本海側など未収録の範囲には表示されません。"
+      }
+    },
+    {
+      "name": "coast after pin 90",
+      "source": 135.688,
+      "detail": {
+        "cells": 3876,
+        "stats": {
+          "total": 3876,
+          "visible": 3876,
+          "preparedBatches": 16,
+          "pendingBatches": 0
+        },
+        "note": "内閣府2025・ケース01｜越流時に堤防破堤 ／ 3,876集約セル・2500m表示。ピンの位置・選んだ津波高では変わらない公式の参考表示です。日本海側など未収録の範囲には表示されません。"
+      }
+    },
+    {
+      "name": "coast after pin -40",
+      "source": 134.694,
+      "detail": {
+        "cells": 3876,
+        "stats": {
+          "total": 3876,
+          "visible": 3876,
+          "preparedBatches": 16,
+          "pendingBatches": 0
+        },
+        "note": "内閣府2025・ケース01｜越流時に堤防破堤 ／ 3,876集約セル・2500m表示。ピンの位置・選んだ津波高では変わらない公式の参考表示です。日本海側など未収録の範囲には表示されません。"
+      }
+    },
+    {
+      "name": "coast after zoom to Kochi",
+      "detail": {
+        "cells": 2624,
+        "stats": {
+          "total": 2624,
+          "visible": 2624,
+          "preparedBatches": 11,
+          "pendingBatches": 0
+        },
+        "note": "内閣府2025・ケース01｜越流時に堤防破堤 ／ 2,624集約セル・100m表示。ピンの位置・選んだ津波高では変わらない公式の参考表示です。日本海側など未収録の範囲には表示されません。"
+      }
+    },
+    {
+      "name": "official mode restored",
+      "detail": {
+        "cells": 2624,
+        "stats": {
+          "total": 2624,
+          "visible": 2624,
+          "preparedBatches": 11,
+          "pendingBatches": 0
+        },
+        "note": "内閣府2025・ケース01｜越流時に堤防破堤 ／ 2,624集約セル・100m表示。ピンの位置・選んだ津波高では変わらない公式の参考表示です。日本海側など未収録の範囲には表示されません。"
+      }
+    }
+  ],
+  "errors": []
+}
