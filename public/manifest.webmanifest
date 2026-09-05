@@ -1,7 +1,7 @@
 {
-  "name": "南海トラフ 津波浸水3Dビジュアライザ 全国版（試作）",
-  "short_name": "南海トラフ津波3D",
-  "description": "内閣府公表の南海トラフ津波高（2025／2012）を、全国沿岸市区町村の PLATEAU 地形・建物の上に水面として重ねて浸水範囲を直感的に見る試作アプリ。簡易可視化であり公式想定ではありません。",
+  "name": "南海トラフ 津波3Dマップ",
+  "short_name": "津波3Dマップ",
+  "description": "全国の実地形で、計算済み浸水データの範囲・深さ・到達情報を確認する防災学習サイト。",
   "lang": "ja",
   "dir": "ltr",
   "start_url": "./",
@@ -9,12 +9,30 @@
   "id": "./",
   "display": "standalone",
   "orientation": "any",
-  "background_color": "#0b1f2a",
-  "theme_color": "#0b1f2a",
-  "categories": ["utilities", "education"],
+  "background_color": "#e9eff1",
+  "theme_color": "#122d42",
+  "categories": [
+    "utilities",
+    "education"
+  ],
   "icons": [
-    { "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
-    { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
-    { "src": "icons/icon-512-maskable.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+    {
+      "src": "icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "icons/icon-512-maskable.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
   ]
 }

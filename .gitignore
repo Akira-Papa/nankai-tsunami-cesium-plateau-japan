@@ -6,3 +6,6 @@ dist/
 .env.*
 .vite/
 npm-debug.log*
+.vercel
+
+__pycache__/

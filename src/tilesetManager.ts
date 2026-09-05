@@ -55,6 +55,8 @@ export interface TilesetManagerOptions {
   maxCameraHeight?: number;
   /** 視野矩形の拡張率。既定 0.2（20 %） */
   expandRatio?: number;
+  /** Legacy uniform water shader. Disable for computed inundation data. */
+  inundationShading?: boolean;
 }
 
 export interface TilesetManager {
@@ -407,7 +409,7 @@ export function createTilesetManager(viewer: Cesium.Viewer, opts: TilesetManager
     const scratch = new Cesium.Cartesian3();
     const slot: Slot = { entry, tileset: ts, shader: makeShader(entry, origin, scratch), origin, scratch };
     try {
-      ts.customShader = slot.shader;
+      if (opts.inundationShading !== false) ts.customShader = slot.shader;
       ts.loadProgress.addEventListener(requestRender);
       ts.allTilesLoaded.addEventListener(requestRender);
       v.scene.primitives.add(ts);

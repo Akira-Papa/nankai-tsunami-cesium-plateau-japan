@@ -1,0 +1,81 @@
+{
+  "base": "http://127.0.0.1:5291",
+  "started": "2026-09-05T02:30:32.249Z",
+  "checks": [
+    {
+      "name": "desktop: local app boot and WebGL canvas",
+      "status": "passed",
+      "detail": {
+        "cases": [
+          "1",
+          "4"
+        ],
+        "canvas": {
+          "x": 320,
+          "y": 76,
+          "width": 1120,
+          "height": 924,
+          "top": 76,
+          "right": 1440,
+          "bottom": 1000,
+          "left": 320
+        },
+        "destroyed": false
+      }
+    },
+    {
+      "name": "desktop: actual local inundation data loaded",
+      "status": "passed",
+      "detail": {
+        "count": 6288,
+        "resolutionM": 2500,
+        "stats": {
+          "total": 6288,
+          "visible": 6288
+        },
+        "status": "6,288集約セル・2500m表示 ／ 3D地形 ／ 建物 0件"
+      }
+    },
+    {
+      "name": "arrival: 0 minutes preserved and point inspection completes",
+      "status": "passed",
+      "detail": "33.55000, 133.55000｜周辺100m集約の最大浸水深 2.49m｜51.8分（1cmへ最早到達）｜指定0分時点：まだ到達記録なし。最大深さは指定時刻の水深ではありません。出典：内閣府2025／ケース01｜越流時に堤防破堤"
+    },
+    {
+      "name": "arrival playback: advances, stops, and stops at 720 minutes",
+      "status": "passed",
+      "detail": "manual stop and 720-minute automatic stop verified"
+    },
+    {
+      "name": "case change: point cleared and camera retained",
+      "status": "passed",
+      "detail": {
+        "id": "4",
+        "height": 2599999.9999993173,
+        "point": "地図上をクリックすると、その周辺の集約浸水データを確認できます。"
+      }
+    },
+    {
+      "name": "share URL restores display state on reload",
+      "status": "passed",
+      "detail": "http://127.0.0.1:5291/?case=4&mode=arrival&min=0&opacity=0.75&buildings=1&photo=0&lite=0&lon=137.00000&lat=35.50000&height=2600000&heading=360.00&pitch=-90.00"
+    },
+    {
+      "name": "mobile 390x844: controls and collapsed map",
+      "status": "passed",
+      "detail": {
+        "scroll": 390,
+        "inner": 390
+      }
+    },
+    {
+      "name": "fault injection: failed new case cannot show stale cells",
+      "status": "passed",
+      "detail": "503 is visible; previous cells removed; retry restored real data"
+    }
+  ],
+  "externalFailures": [],
+  "localFailures": [],
+  "pageErrors": [],
+  "finished": "2026-09-05T02:30:42.684Z"
+}

@@ -1,9 +1,9 @@
 {
-  "name": "nagoya-tsunami-3d-cesium-plateau",
+  "name": "nankai-tsunami-cesium-precomputed",
   "private": true,
   "version": "0.1.0",
   "type": "module",
-  "description": "名古屋市 津波浸水3Dビジュアライザ（CesiumJS + PLATEAU配信）",
+  "description": "全国3D地図と内閣府2025の加工集約浸水データによる防災学習サイト（Cesium + Vercel）",
   "engines": {
     "node": ">=20.19.0"
   },

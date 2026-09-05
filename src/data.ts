@@ -152,7 +152,7 @@ export class DataLoadError extends Error {
 async function fetchJson<T>(url: string, file: string, validate: (v: unknown) => v is T): Promise<T> {
   let res: Response;
   try {
-    res = await fetch(url, { cache: 'default' });
+    res = await fetch(url, { cache: 'default', signal: AbortSignal.timeout(20000) });
   } catch (e) {
     throw new DataLoadError(file, `ネットワークエラー: ${(e as Error).message}`);
   }
