@@ -28,11 +28,12 @@ export function simulationCellIndex(grid: TerrainGrid, lon: number, lat: number)
   const row = Math.min(grid.height - 1, axis(lat, south));
   return row * grid.width + col;
 }
-export function simulationPixels(result: SimulationResult): Uint8ClampedArray {
+export function simulationPixels(result: SimulationResult, oceanOnly = false): Uint8ClampedArray {
   const { width, height } = result.grid;
   const pixels = new Uint8ClampedArray(width * height * 4);
   for (let row = 0; row < height; row++) for (let col = 0; col < width; col++) {
     const cell = row * width + col;
+    if(oceanOnly&&!result.ocean[cell])continue;
     const color = simulationColor(result.ocean[cell] ? result.maxSurface[cell] : result.maxDepth[cell], !!result.ocean[cell]);
     if (!color) continue;
     const pixel = ((height - 1 - row) * width + col) * 4;
@@ -57,7 +58,7 @@ export function inspectSimulation(result: SimulationResult | null, lon: number, 
     `計算時間 ${(result.elapsedSec / 60).toFixed(0)} 分、粗いメッシュ 約 ${lonKm.toFixed(1)} × ${latKm.toFixed(1)} km。未検証の試算であり、安全や建物ごとの浸水を判定できません。`;
 }
 
-export function createSimulationLayer(viewer: Cesium.Viewer) {
+export function createSimulationLayer(viewer: Cesium.Viewer, options: {oceanOnly?:boolean;detail?:boolean} = {}) {
   let generation = 0;
   let disposed = false;
   let result: SimulationResult | null = null;
@@ -86,7 +87,7 @@ export function createSimulationLayer(viewer: Cesium.Viewer) {
     const context = canvas.getContext('2d');
     if (!context) throw new Error('結果画像を作成できませんでした。');
     const image = context.createImageData(grid.width, grid.height);
-    image.data.set(simulationPixels(next));
+    image.data.set(simulationPixels(next, options.oceanOnly));
     context.putImageData(image, 0, 0);
     const [west, south, east, north] = simulationBounds(grid);
     const rectangle = Cesium.Rectangle.fromDegrees(west, south, east, north);
@@ -95,14 +96,14 @@ export function createSimulationLayer(viewer: Cesium.Viewer) {
       polyline: { positions: Cesium.Cartesian3.fromDegreesArray([west, south, east, south, east, north, west, north, west, south]), width: 2,
         material: Cesium.Color.fromCssColorString('#fcac38'), clampToGround: true },
       position: Cesium.Cartesian3.fromDegrees((west + east) / 2, north),
-      label: { text: `試算領域｜粗い ${grid.step}° メッシュ｜領域外は未計算`, font: '13px sans-serif',
+      label: { text: options.detail?'沿岸詳細枠｜約28m地形・接続性試算｜枠外の陸は未計算':`沖合の試算領域｜粗い ${grid.step}° メッシュ`, font: '13px sans-serif',
         fillColor: Cesium.Color.WHITE, showBackground: true, backgroundColor: Cesium.Color.fromCssColorString('#193448'),
         disableDepthTestDistance: Number.POSITIVE_INFINITY, pixelOffset: new Cesium.Cartesian2(0, -12) },
     });
     // A single image avoids tens of thousands of primitive allocations. fromUrl
     // decodes asynchronously; generation prevents stale images returning after clear.
     await Cesium.SingleTileImageryProvider.fromUrl(canvas.toDataURL('image/png'), {
-      rectangle, credit: '独自浅水試算・地形 NOAA ETOPO1（粗いメッシュ／未検証）',
+      rectangle, credit: options.detail?'地理院タイル DEM・約28m地形接続性試算（未検証）':'独自浅水試算・地形 NOAA ETOPO1（粗いメッシュ／未検証）',
     }).then(provider => {
       if (disposed || generation !== token || viewer.isDestroyed()) return;
       imagery = new Cesium.ImageryLayer(provider, { rectangle, alpha: 0.85,
@@ -115,6 +116,6 @@ export function createSimulationLayer(viewer: Cesium.Viewer) {
     });
     viewer.scene.requestRender();
   }
-  return { setResult, clear, dispose() { clear(); disposed = true; },
-    inspect(lon: number, lat: number) { return renderError || inspectSimulation(result, lon, lat); } };
+  return { setCutout(bounds:[number,number,number,number]|undefined){if(imagery){imagery.cutoutRectangle=bounds?Cesium.Rectangle.fromDegrees(...bounds):undefined as unknown as Cesium.Rectangle;viewer.scene.requestRender();}},setResult, clear, dispose() { clear(); disposed = true; },
+    inspect(lon: number, lat: number) { const i=result?simulationCellIndex(result.grid,lon,lat):null;if(options.oceanOnly&&result&&i!==null&&!result.ocean[i])return 'この陸上地点の詳細浸水深は未計算です。海岸へ拡大して「表示中の海岸を詳細計算」を押してください。';return renderError || inspectSimulation(result, lon, lat); } };
 }

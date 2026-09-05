@@ -1,4 +1,5 @@
 import * as Cesium from 'cesium';
+import {createCoastalController} from './coastalController';
 import { initSimulationUi } from './simulationUi';
 import { loadTerrain, selectGrid } from './simulationTerrain';
 import { createSimulationLayer } from './simulationLayer';
@@ -8,7 +9,7 @@ export function initDynamicSimulation(viewer: Cesium.Viewer, onMode: (active: bo
   const container = document.createElement('section');
   container.className = 'simulation-host';
   document.querySelector('.panel-intro')!.after(container);
-  const layer = createSimulationLayer(viewer);
+  const layer = createSimulationLayer(viewer,{oceanOnly:true});
   let active = false, picking = false, generation = 0, timer: ReturnType<typeof setTimeout> | undefined;
   let worker: Worker | undefined, result: SimulationResult | undefined;
   let pin: Cesium.Entity | undefined;
@@ -33,11 +34,12 @@ export function initDynamicSimulation(viewer: Cesium.Viewer, onMode: (active: bo
     onRun() { if (active) { invalidate(); void calculate(); } },
     onCancel() { invalidate(); setStatus('計算を中止しました。再計算ボタンで実行できます。'); },
   });
+  const coastal=createCoastalController(viewer,bounds=>layer.setCutout(bounds));
   function setStatus(text: string) { ui.setStatus(text); if (active) onStatus?.(text); }
   function invalidate() {
     generation++; clearTimeout(timer); timer = undefined;
     worker?.terminate(); worker = undefined; running = false;
-    result = undefined; layer.clear(); ui.setResult(''); ui.setProgress(0); ui.setBusy(false);
+    result = undefined; layer.clear(); coastal.clear(); ui.setResult(''); ui.setProgress(0); ui.setBusy(false);
     if (active) readout('条件を変更したため結果は未計算です。計算完了後に地図をクリックしてください。');
   }
   function showPin() {
@@ -82,14 +84,14 @@ export function initDynamicSimulation(viewer: Cesium.Viewer, onMode: (active: bo
           setStatus('計算結果を地図へ描画中…');
           try { await layer.setResult(completed); } catch (error) { reject(error instanceof Error ? error.message : '結果を表示できません'); return; }
           if (id !== generation || !active) return;
-          result = completed; running = false; ui.setProgress(100); ui.setBusy(false);
-          let maxLand = 0, maxSea = 0, landCount = 0;
+          result = completed; coastal.setCoarse(completed,config); running = false; ui.setProgress(100); ui.setBusy(false);
+          let maxSea = 0;
           for (let i = 0; i < result.maxDepth.length; i++) {
             if (result.ocean[i]) maxSea = Math.max(maxSea, result.maxSurface[i]);
-            else if (result.maxDepth[i] > .01) { landCount++; maxLand = Math.max(maxLand, result.maxDepth[i]); }
+
           }
-          setStatus(`計算完了：波源 ${config.lon.toFixed(3)}°E / ${config.lat.toFixed(3)}°N ／ ${config.durationMinutes}分間・${result.steps.toLocaleString()}ステップ・${resolution}`);
-          ui.setResult(`海上の最大水位上昇 ${maxSea.toFixed(2)}m ／ 陸上の最大浸水深 ${maxLand.toFixed(2)}m（${landCount.toLocaleString()}セル）。計算期間内の最大値です。細かな沿岸低地を表せないため、無着色から安全とは判断できません。`);
+          setStatus(`沖合計算完了：波源 ${config.lon.toFixed(3)}°E / ${config.lat.toFixed(3)}°N ／ ${config.durationMinutes}分間・${result.steps.toLocaleString()}ステップ・${resolution}`);
+          ui.setResult(`沖合の最大水位上昇 ${maxSea.toFixed(2)}m。海岸の浸水深・着色範囲は「海岸もピンから計算」に表示します。詳細枠の外の陸は未計算です。`);
           readout(picking ? '再計算した結果を表示しました。海上クリックで波源を移動して再計算します。数値を見るには「浸水深を調べる」を選んでください。' : '任意条件の計算結果を表示しました。地図をクリックするとセルの数値を確認できます。');
         } else if (m.type === 'error') reject(m.message ?? '計算に失敗しました');
       };
@@ -106,14 +108,14 @@ export function initDynamicSimulation(viewer: Cesium.Viewer, onMode: (active: bo
     }
   }
   return {
-    get active() { return active; }, get running() { return running; }, get result() { return result; },
+    get coastal(){return coastal;}, get active() { return active; }, get running() { return running; }, get result() { return result; },
     get config() { return ui.getConfig(); },
     handleClick(lon: number, lat: number) {
       if (!active) return false;
       if (picking) {
         if (lon < 122 || lon > 150 || lat < 24 || lat > 46) { setStatus('計算範囲（東経122–150度、北緯24–46度）の海上を選んでください。'); return true; }
         ui.setSource(lon, lat); showPin(); schedule();
-      } else readout(result ? layer.inspect(lon, lat) : 'まだ計算結果がありません。完了後に地点を選択してください。');
+      } else readout(result ? coastal.inspect(lon,lat)??layer.inspect(lon, lat) : 'まだ計算結果がありません。完了後に地点を選択してください。');
       return true;
     },
     cancel() { invalidate(); },

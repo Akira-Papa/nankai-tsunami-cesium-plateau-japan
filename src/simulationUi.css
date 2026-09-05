@@ -65,3 +65,4 @@
 @media(prefers-reduced-motion:reduce){.simulation-spinner{animation:none}}
 
 .simulation-reference{margin-top:14px;padding:10px 12px;background:#faf1f7;border-left:3px solid #d76b9d;font-size:10px;line-height:1.7}.simulation-reference strong{color:#81476e}.simulation-reference p{margin:5px 0 0;color:#644c5e}
+.coastal-loading{position:fixed;z-index:35;right:20px;top:160px;max-width:calc(100vw - 40px);padding:14px 18px;color:white;background:#173b50;border-radius:8px;box-shadow:0 4px 18px #0003;pointer-events:none;font-size:13px}.coastal-loading[hidden]{display:none}.coastal-loading::before{content:'◌';display:inline-block;animation:simulation-spin 1s linear infinite;margin-right:8px}#coastalRecalculate,#coastalFly{margin:5px 0;padding:8px;border:1px solid #aab9c2;border-radius:5px;background:white;color:#173b50;cursor:pointer}

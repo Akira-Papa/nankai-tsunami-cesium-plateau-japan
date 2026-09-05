@@ -1,0 +1,17 @@
+{
+  "base": "http://127.0.0.1:5295",
+  "checks": [
+    {
+      "name": "mobile national view auto-selects a nearby coast",
+      "note": "沿岸詳細完了：132.900°E / 32.800°N。約28m間隔・481×481セル、標高取得 146,056セル、着色 785セル、最大浸水深 1.33m。着色が枠の端に達しています。到達の終端は未確定です。黄色〜紫がピンからの地形接続性試算。枠の外・欠損は未計算。DEMの欠損と粗い海域判定から海岸線を推定。最大水位を用いた静的試算で、波の勢い・流量・防潮堤・到達時刻は再現しません。"
+    },
+    {
+      "name": "DEM-stage loading, cancellation and stale result suppression"
+    },
+    {
+      "name": "rapid consecutive pins keep final source and update detailed coast",
+      "note": "沿岸詳細完了：132.900°E / 32.800°N。約28m間隔・481×481セル、標高取得 146,051セル、着色 538セル、最大浸水深 0.98m。着色が枠の端に達しています。到達の終端は未確定です。黄色〜紫がピンからの地形接続性試算。枠の外・欠損は未計算。DEMの欠損と粗い海域判定から海岸線を推定。最大水位を用いた静的試算で、波の勢い・流量・防潮堤・到達時刻は再現しません。"
+    }
+  ],
+  "errors": []
+}

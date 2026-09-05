@@ -24,8 +24,8 @@ export function initSimulationUi(container: HTMLElement, callbacks: SimulationUi
       <label><input id="simulationModeCustom" type="radio" name="simulationMode" value="custom"><span>任意条件で計算</span></label>
     </fieldset>
     <div id="simulationControls" hidden>
-      <div class="simulation-reference"><strong>海岸のピンク〜紫：公式の参考表示</strong><p id="simulationReferenceNote">内閣府2025の計算済み浸水を重ねています。ピンから再計算した結果とは別のデータです。</p><p>任意条件の計算結果は、海が青・陸が黄〜赤です。</p></div>
-      <p class="simulation-notice">数kmメッシュの実験計算・実災害の予測ではありません</p>
+      <div class="simulation-reference"><strong>海岸もピンから計算</strong><p>沖合の波の計算結果と国土地理院の標高を使い、海から水が通れる低地を約28m間隔で試算します。詳細枠の外の陸は未計算です。</p><p>詳細化するのは地形です。沖合の水位は粗い計算のため、実際の到達範囲・到達時刻の予測ではありません。</p><button id="coastalRecalculate" type="button">表示中の海岸を詳細計算</button><button id="coastalFly" type="button">詳細結果の場所へ</button><p id="coastalStatus" role="status">波源の計算後、近くの海岸を自動で詳細計算します。</p></div>
+      <p class="simulation-notice">沖合は粗い波動計算／沿岸は約28m地形の静的試算。実災害の予測ではありません</p>
       <div class="simulation-field">
         <label for="simulationHeight">波源の津波高（初期水面上昇）</label>
         <output id="simulationHeightOutput" for="simulationHeight">5.0 m</output>

@@ -26,18 +26,11 @@ let resolutionM = 2500;
 let viewEpoch = 0, pickEpoch = 0, refreshTimer = 0;
 let terrainState = '地形を読込中';
 let dataStatus = '計算データを読込中';
-let coastStatus = '読込中';
-function coastDisplay() { return simulation?.active ? {...current,mode:'max' as const} : current; }
-function setCoastStatus(text:string) {
-  coastStatus=text;
-  if(!simulation?.active)dataStatus=text;
-  const note=document.getElementById('simulationReferenceNote');
-  if(note)note.textContent=`内閣府2025・${manifest?.cases.find(c=>c.id===current?.caseId)?.label??'ケース未取得'} ／ ${text}。ピンの位置・選んだ津波高では変わらない公式の参考表示です。日本海側など未収録の範囲には表示されません。`;
-}
 let startupWarning = '';
 let marker: Cesium.Entity | undefined;
 let lastPoint: {lon:number;lat:number} | undefined;
 
+function setDataStatus(text:string){dataStatus=text;}
 function status() {
   const b = buildings?.stats();
   ui?.setStatus(`${startupWarning}${dataStatus} ／ ${terrainState} ／ 建物 ${b?.loaded ?? 0}件${b?.loading ? '（読込中）' : ''}`);
@@ -70,26 +63,27 @@ function scheduleRefresh() {
   refreshTimer=window.setTimeout(() => { void refresh(); buildings?.update(); },250);
 }
 async function refresh() {
-  if(!current || !current.caseId) {setCoastStatus('浸水データ未読込：再試行ボタンを押してください');status();return;}
+  if(simulation?.active)return;
+  if(!current || !current.caseId) {setDataStatus('浸水データ未読込：再試行ボタンを押してください');status();return;}
   clearTimeout(refreshTimer);
   const epoch=++viewEpoch;
   const box=bbox();
   const span=Math.max(box[2]-box[0],box[3]-box[1]);
   const level=span>4?2500:span>.6?500:100;
-  setCoastStatus('計算データを読込中'); status();
+  setDataStatus('計算データを読込中'); status();
   try {
     const result=await loadView(current.caseId,box,level);
     if(epoch!==viewEpoch) return;
     const unchanged=resolutionM===result.resolutionM&&cells.length===result.cells.length&&cells.every((c,i)=>c===result.cells[i]);
     cells=result.cells; resolutionM=result.resolutionM;
-    if(!unchanged)layer.setCells(cells); layer.setDisplay(coastDisplay());
-    setCoastStatus(cells.length ? `${cells.length.toLocaleString()}集約セル・${resolutionM}m表示${result.truncated?'（表示上限あり）':''}`:'この表示範囲に収録セルなし（安全を意味しません）');
+    if(!unchanged)layer.setCells(cells); layer.setDisplay(current);
+    setDataStatus(cells.length ? `${cells.length.toLocaleString()}集約セル・${resolutionM}m表示${result.truncated?'（表示上限あり）':''}`:'この表示範囲に収録セルなし（安全を意味しません）');
     ui?.setDataNote(`内閣府2025・${manifest.cases.find(c=>c.id===current.caseId)?.label ?? current.caseId}。${resolutionM}m集約表示。色は集約内の最大浸水深、時間は最早1cm到達。両者は同じ元セルとは限りません。着色セル全体が浸水する意味ではありません。地形・建物の細かさは計算解像度を示しません。`);
     status(); viewer.scene.requestRender();
   } catch(error) {
     if(epoch!==viewEpoch) return;
     layer.clear(); cells=[];
-    setCoastStatus(`計算データ取得失敗：${error instanceof Error?error.message:String(error)}。地図を移動するかケースを選び直して再試行`); status();
+    setDataStatus(`計算データ取得失敗：${error instanceof Error?error.message:String(error)}。地図を移動するかケースを選び直して再試行`); status();
   }
 }
 function clearPick() { ++pickEpoch; lastPoint=undefined; if(marker) marker.show=false; ui?.setReadout('地図上をクリックすると、その周辺の集約浸水データを確認できます。'); }
@@ -99,7 +93,7 @@ function apply(s: ExplorerState) {
   if(!prev || prev.photo!==s.photo) { const old=viewer.imageryLayers.get(0); if(old)viewer.imageryLayers.remove(old,true); viewer.imageryLayers.add(imagery(s.photo),0); }
   if(!prev || prev.lite!==s.lite) applySceneQuality(viewer,QUALITY_PROFILES[s.lite?'lite':'standard']);
   buildings?.setEnabled(s.buildings && !s.lite);
-  layer.setDisplay(coastDisplay());
+  layer.setDisplay(current);
   if(lastPoint && prev && (prev.minutes!==s.minutes||prev.mode!==s.mode)) void inspectPoint(lastPoint.lon,lastPoint.lat);
   viewer.scene.requestRender();
 }
@@ -155,12 +149,12 @@ async function boot() {
     },
   });
   simulation=initDynamicSimulation(viewer,(active)=>{
-    ++viewEpoch; clearPick(); layer.setDisplay(coastDisplay());
+    ++viewEpoch; clearPick(); layer.clear(); cells=[];
     const play=document.getElementById('playArrival');
     if(play?.getAttribute('aria-pressed')==='true')play.click();
     dataStatus=active?'任意条件の実験計算モード':'計算済みデータへ切替中';
-    const badge=document.querySelector('.map-badge');if(badge)badge.textContent=active?'任意試算 ＋ 海岸の公式参考表示':'全国3D · 計算済み浸水データ';
-    setCoastStatus(coastStatus); void refresh(); status();
+    const badge=document.querySelector('.map-badge');if(badge)badge.textContent=active?'ピンから計算 · 沿岸は標高と接続性で試算':'全国3D · 計算済み浸水データ';
+    if(!active)void refresh(); status();
   },text=>ui?.setReadout(text),text=>{dataStatus=text;status();});
   if(startupWarning)ui.setDataNote('計算済みデータの取得に失敗しました。未取得の状態では浸水の有無を判断できません。データを再試行してください。');
   document.getElementById('retryData')?.addEventListener('click',()=>{if(simulation?.active){simulation.retry();void refresh();}else if(startupWarning)location.reload();else void refresh();});
